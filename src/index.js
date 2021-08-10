@@ -1,12 +1,21 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import {BrowserRouter as Router, Switch, Route} from 'react-router-dom';
 import './index.css';
-import App from './App';
 import reportWebVitals from './reportWebVitals';
+import Home from "./components/Home";
+import Player from "./components/Player";
+import Callback from "./components/Callback";
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <Router>
+        <Switch>
+            <Route path="/callback" component={Callback} />
+            <Route path="/play/:playerId" component={Player} />
+            <Route exact path="/" component={Home} />
+        </Switch>
+    </Router>
   </React.StrictMode>,
   document.getElementById('root')
 );
