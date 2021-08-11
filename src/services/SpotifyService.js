@@ -1,4 +1,5 @@
 export const client_id = "4231ede22a1a4728ba29b7bf2a12612e";
+export const client_secret = "8ea73dfafbc241fc83cecc93722c9468";
 
 export const generateRandomString = (length) => {
     let text = '';
@@ -10,18 +11,26 @@ export const generateRandomString = (length) => {
     return text;
 }
 
-export async function authorize() {
-    const redirect = 'https://localhost:3000/callback';
-    const scope = 'user-read-private user-read-email';
-    const developing = true;
-    const state = generateRandomString(10);
-    return fetch(`https://accounts.spotify.com/authorize?client_id=${client_id}&response_type=code&redirect_uri=${redirect}&state=${state}&scope=${scope}&show_dialog=${developing}`, {
+export const jsonToUrlEncoded = (obj) => Object.keys(obj).map(key => encodeURIComponent(key) + '=' + encodeURIComponent(obj[key])).join('&');
+
+export async function getAuthTokens(auth_code) {
+    const redirect = 'http://localhost:3000/callback';
+    const body = {
+        grant_type: "authorization_code",
+        code: auth_code,
+        redirect_uri: redirect
+    };
+    const encoded = jsonToUrlEncoded(body);
+    //console.log('service: get tokens')
+
+    return fetch('https://accounts.spotify.com/api/token', {
+        method: 'POST',
         headers: {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Credentials': 'true',
-            'content-type': 'application/json'
-        }
-    }).then(response => response.json()).catch(error => console.log('Authorization failed : ' + error.message));
+            "Content-Type": 'application/x-www-form-urlencoded',
+            Authorization: 'Basic ' + window.btoa(`${client_id}:${client_secret}`)
+        },
+        body: encoded
+    }).then(res =>  res.json()).catch(e => e.json())
 }
 
 //const service = {authorize, generateRandomString};

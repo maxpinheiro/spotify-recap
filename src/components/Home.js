@@ -2,7 +2,7 @@ import React from 'react';
 import {generateRandomString, client_id} from '../services/SpotifyService';
 
 const redirect = 'http://localhost:3000/callback';
-const scope = 'user-read-private user-read-email';
+const scope = 'streaming user-read-private user-read-email';
 const developing = true;
 const state = generateRandomString(10);
 

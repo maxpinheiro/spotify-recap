@@ -1,10 +1,12 @@
 import React from 'react';
 
+const queryString = require('query-string');
+
+
 class Player extends React.Component {
     componentDidMount() {
-        const playerId = this.props.match.params.playerId;
-        if (!playerId) return;
-        console.log(playerId);
+        const {access_token, refresh_token, expires_in} = queryString.parse(this.props.location.search);
+        console.log(access_token)
     }
 
     render() {
