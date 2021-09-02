@@ -1,5 +1,5 @@
-export const client_id = "4231ede22a1a4728ba29b7bf2a12612e";
-export const client_secret = "8ea73dfafbc241fc83cecc93722c9468";
+export const client_id = "171ae7dd63c640819e0446c3b2dfd196";
+export const client_secret = "b0abf14d0a084609b0ab79251dab34d4";
 
 export const generateRandomString = (length) => {
     let text = '';
@@ -30,6 +30,15 @@ export async function getAuthTokens(auth_code) {
             Authorization: 'Basic ' + window.btoa(`${client_id}:${client_secret}`)
         },
         body: encoded
+    }).then(res =>  res.json()).catch(e => e.json())
+}
+
+export async function getCurrentPlayback(access_token) {
+    return fetch('https://api.spotify.com/v1/me/player', {
+        headers: {
+            "Content-Type": 'application/json',
+            Authorization: `Bearer ${access_token}`
+        }
     }).then(res =>  res.json()).catch(e => e.json())
 }
 

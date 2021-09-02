@@ -114,6 +114,8 @@ dist
 
 # production
 /build
+.idea
+.idea/workspace.xml
 
 # misc
 .DS_Store
