@@ -4,13 +4,15 @@ import {BrowserRouter as Router, Switch, Route} from 'react-router-dom';
 import './index.css';
 import Home from "./components/Home";
 import Player from "./components/Player";
-import Callback from "./components/Callback";
+import SpotifyCallback from "./components/SpotifyCallback";
+import GeniusCallback from "./components/GeniusCallback";
 
 ReactDOM.render(
   <React.StrictMode>
     <Router>
         <Switch>
-            <Route path="/callback" component={Callback} />
+            <Route path="/spotifycallback" component={SpotifyCallback} />
+            <Route path="/geniuscallback" component={GeniusCallback} />
             <Route path="/player" component={Player} />
             <Route exact path="/" component={Home} />
         </Switch>

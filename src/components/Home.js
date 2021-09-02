@@ -1,7 +1,6 @@
 import React from 'react';
-import {generateRandomString, client_id} from '../services/SpotifyService';
+import {generateRandomString, spotify_client_id, spotify_redirect_uri} from '../services/SpotifyService';
 
-const redirect = 'http://localhost:3000/callback';
 const scope = 'streaming user-read-private user-read-email';
 const developing = true;
 const state = generateRandomString(10);
@@ -10,8 +9,8 @@ const Home = () => {
 
     return (
         <div>
-            <a href={`https://accounts.spotify.com/authorize?client_id=${client_id}&response_type=code&redirect_uri=${redirect}&state=${state}&scope=${scope}&show_dialog=${developing}`}>
-                Login
+            <a href={`https://accounts.spotify.com/authorize?client_id=${spotify_client_id}&response_type=code&redirect_uri=${spotify_redirect_uri}&state=${state}&scope=${scope}&show_dialog=${developing}`}>
+                Login through Spotify
             </a>
         </div>
     )

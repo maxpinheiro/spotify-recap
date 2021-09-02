@@ -1,5 +1,7 @@
-export const client_id = "171ae7dd63c640819e0446c3b2dfd196";
-export const client_secret = "b0abf14d0a084609b0ab79251dab34d4";
+// spotify dashboard: maxpinheiro181, Poi1poi1$$
+export const spotify_client_id = "171ae7dd63c640819e0446c3b2dfd196";
+export const spotify_client_secret = "b0abf14d0a084609b0ab79251dab34d4";
+export const spotify_redirect_uri = "http://localhost:3000/spotifycallback";
 
 export const generateRandomString = (length) => {
     let text = '';
@@ -13,12 +15,11 @@ export const generateRandomString = (length) => {
 
 export const jsonToUrlEncoded = (obj) => Object.keys(obj).map(key => encodeURIComponent(key) + '=' + encodeURIComponent(obj[key])).join('&');
 
-export async function getAuthTokens(auth_code) {
-    const redirect = 'http://localhost:3000/callback';
+export async function getTokens(auth_code) {
     const body = {
         grant_type: "authorization_code",
         code: auth_code,
-        redirect_uri: redirect
+        redirect_uri: spotify_redirect_uri
     };
     const encoded = jsonToUrlEncoded(body);
     //console.log('service: get tokens')
@@ -27,7 +28,7 @@ export async function getAuthTokens(auth_code) {
         method: 'POST',
         headers: {
             "Content-Type": 'application/x-www-form-urlencoded',
-            Authorization: 'Basic ' + window.btoa(`${client_id}:${client_secret}`)
+            Authorization: 'Basic ' + window.btoa(`${spotify_client_id}:${spotify_client_secret}`)
         },
         body: encoded
     }).then(res =>  res.json()).catch(e => e.json())
