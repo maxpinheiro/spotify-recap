@@ -2,7 +2,6 @@ import React from 'react';
 import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
 import Loader from "react-loader-spinner";
 import {getTokens} from '../services/SpotifyService';
-import {getAccessToken} from "../services/GeniusService";
 import { Link } from 'react-router-dom';
 
 const queryString = require('query-string');

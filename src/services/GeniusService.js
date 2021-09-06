@@ -18,5 +18,14 @@ export async function getAccessToken(auth_code) {
             "redirect_uri": genius_redirect_uri,
             "response_type": "code",
         }
-    }).then(res =>  res.json()).catch(e => e.json())
+    }).then(res =>  res.json())
+}
+
+export async function getLyricsForSong(song, artist, access_token) {
+    return fetch(`http://api.genius.com/search?q=${song} ${artist}`, {
+        headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Authorization": `Bearer ${access_token}`
+        }
+    }).then(res =>  res.json())
 }

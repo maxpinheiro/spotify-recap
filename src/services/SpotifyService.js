@@ -40,7 +40,16 @@ export async function getCurrentPlayback(access_token) {
             "Content-Type": 'application/json',
             Authorization: `Bearer ${access_token}`
         }
-    }).then(res =>  res.json()).catch(e => e.json())
+    }).then(res =>  res.json())
+}
+
+export async function getCurrentTrack(access_token) {
+    return fetch('https://api.spotify.com/v1/me/player/currently-playing', {
+        headers: {
+            "Content-Type": 'application/json',
+            Authorization: `Bearer ${access_token}`
+        }
+    }).then(res =>  res.json())
 }
 
 //const service = {authorize, generateRandomString};
