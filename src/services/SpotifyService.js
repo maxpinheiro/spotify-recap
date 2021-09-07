@@ -49,7 +49,7 @@ export async function getCurrentTrack(access_token) {
             "Content-Type": 'application/json',
             Authorization: `Bearer ${access_token}`
         }
-    }).then(res =>  res.json())
+    }).then(res => (res.status === 204 ? {} : res.json()))
 }
 
 const spotifyService = {getTokens, getCurrentPlayback, getCurrentTrack};

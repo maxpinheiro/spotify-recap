@@ -1,7 +1,8 @@
 import React from 'react';
 import spotifyService from "../services/SpotifyService";
 import geniusService from "../services/GeniusService";
-import musixMatchService from "../services/MusixMatchService";
+import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
+import Loader from "react-loader-spinner";
 
 const queryString = require('query-string');
 
@@ -18,6 +19,51 @@ class Player extends React.Component {
             genius_access_token: undefined,
             song: undefined
         };
+        this.state = {
+            status: "success",
+            song: {
+                title: "Sweet",
+                artist: "Bren Joy",
+                albumArtURL: "https://images.genius.com/82c0310b3a3ddb16230e3b93745106ca.1000x1000x1.jpg",
+                lyrics: "[Chorus: Caleb Lee]\n" +
+                    "I got you going so far\n" +
+                    "Keep running away from me\n" +
+                    "(Running away from me yeah)\n" +
+                    "You said you know who you are\n" +
+                    "You keep it so sweet\n" +
+                    "\n" +
+                    "[Refrain: Landon Sears]\n" +
+                    "Are you recordin'? All right\n" +
+                    "Okay welcome to your twenties twenties twenties twenties twenties babe\n" +
+                    "Welcome to your twenties twenties twenties twenties twenties babe\n" +
+                    "Welcome to your twenties twenties twenties twenties twenties babe\n" +
+                    "Welcome to your twenties babe\n" +
+                    "Welcome to your twenties babe\n" +
+                    "Welcome to ya\n" +
+                    "\n" +
+                    "[Verse 1: Bren Joy]\n" +
+                    "I'll admit it\n" +
+                    "I been wanting you and I been\n" +
+                    "Tryna kick it\n" +
+                    "Watching every move if I could\n" +
+                    "Get a minute\n" +
+                    "I'll show you I'm the one to choose\n" +
+                    "(Hit it then I flip it, love the way you get it)\n" +
+                    "I been feeling\n" +
+                    "You since the beginning you so\n" +
+                    "Independent\n" +
+                    "Always steady winning if I\n" +
+                    "Get a minute\n" +
+                    "I'll show you I'm the one for you\n" +
+                    "(Hit it then I flip it, love the way you get it)\n" +
+                    "Okay okay okay\n" +
+                    "I'm honestly, tryna see\n" +
+                    "If me and you could be a possibly, modesty\n" +
+                    "Is what I’m 'bout but man I'm thrown up off the Hennessy\n" +
+                    "So let me drown you in the Prada\n" +
+                    "It would be an honor"
+            }
+        };
     }
 
     componentDidMount() {
@@ -26,7 +72,7 @@ class Player extends React.Component {
         const {spotify_access_token, spotify_refresh_token, spotify_expires_in, genius_access_token} = queryString.parse(this.props.location.search);
         //console.log({spotify_access_token, spotify_refresh_token, spotify_expires_in, genius_access_token});
         if (spotify_access_token && genius_access_token) {
-            this.findCurrentSong(spotify_access_token, genius_access_token);
+            //this.findCurrentSong(spotify_access_token, genius_access_token);
         }
 
     }
@@ -34,28 +80,32 @@ class Player extends React.Component {
     findCurrentSong(spotify_access_token, genius_access_token) {
         spotifyService.getCurrentTrack(spotify_access_token)
             .then(data => {
-                //console.log(data);
                 if (data.item && data.item.name && data.item.artists && data.item.artists[0].name) {
-                    const title = data.item.name;
+                    const song = data.item.name;
                     const artist = data.item.artists[0].name;
-                    //this.findLyricsGenius(song, artist, genius_access_token);
-                    geniusService.getSongArtist(title, artist, genius_access_token)
-                        .then(song => {
-                            this.setState({
-                                status: "success",
-                                song: {
-                                    title,
-                                    artist,
-                                    albumArtURL: song.albumArtURL,
-                                    lyrics: song.lyrics
-                                }
-                            });
-                        }).catch(e => {})
+                    this.findLyrics(song, artist, genius_access_token);
+                } else {
+                    this.setState({status: "error", message: "No track is currently playing. Please play a track and refresh the page for the lyric player to work."});
                 }
             }).catch(e => {})
     }
 
-    findLyricsGenius(song, artist, genius_access_token) {
+    findLyrics(song, artist, genius_access_token) {
+        geniusService.getSongArtist(song, artist, genius_access_token)
+            .then(songData => {
+                if (songData.albumArt) {
+                    this.setState({
+                        status: "success",
+                        song: {
+                            title: song,
+                            artist,
+                            albumArtURL: songData.albumArt,
+                            lyrics: songData.lyrics
+                        }
+                    });
+                }
+            }).catch(e => {})
+        /*
         geniusService.searchSong(song, artist, genius_access_token)
             .then(result => {
                 //console.log(result);
@@ -75,44 +125,35 @@ class Player extends React.Component {
                     })
                 }
             }).catch(e => {})
-    }
-
-    findLyricsMusixMatch(song, artist) {
-        musixMatchService.searchTrack(song, artist)
-            .then(result => {
-                //console.log(result);
-                if (result && result.message && result.message.body && result.message.body.track_list) {
-                    const track = result.message.body.track_list[0].track;
-                    const track_id = track.track_id;
-                    musixMatchService.getLyricsForTrack(track_id)
-                        .then(res => {
-                            console.log(res);
-                            if (res && res.message && res.message.body && res.message.body.lyrics) {
-                                const lyrics = res.message.body.lyrics.lyrics_body;
-                                this.setState({
-                                    status: "success",
-                                    song: {
-                                        title: song,
-                                        artist,
-                                        lyrics
-                                    }
-                                })
-                            }
-                        }).catch(e => {})
-                }
-            }).catch(e => {})
+         */
     }
 
 
     render() {
         return (
-            <div>
-                {this.state.song &&
-                <div>
-                    <span>{this.state.song.title} by {this.state.song.artist}</span>
-                    <img src={this.state.song.albumArtURL} alt="" />
-                    <pre>{this.state.song.lyrics}</pre>
-                </div>
+            <div className="container mx-auto">
+                {
+                    this.state.status === "loading" &&
+                    <div>
+                        <p>Logging you in...</p>
+                        <Loader type="Oval" color="#15d61c" height={80} width={80}/>
+                    </div>
+                }
+                {
+                    this.state.status === "success" && this.state.song &&
+                    <div className="font-sans">
+                        <div className="flex justify-center items-end my-3">
+                            <p className="text-xl font-medium">{this.state.song.title}</p>
+                            <pre className="font-sans"> by </pre>
+                            <p className="text-xl font-medium"> {this.state.song.artist}</p>
+                        </div>
+                        <img className="mx-auto my-3" src={this.state.song.albumArtURL} alt="" width="25%" height="25%"/>
+                        <pre className="text-center font-sans my-3">{this.state.song.lyrics}</pre>
+                    </div>
+                }
+                {
+                    this.state.status === "error" &&
+                    <p>{this.state.message}</p>
                 }
 
             </div>

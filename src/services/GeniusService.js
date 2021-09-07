@@ -1,8 +1,6 @@
 // genius dashboard: maxpinheiro181,
 import geniusAPI from 'genius-lyrics-api';
 
-const genius_api_key = "z-8S8YhMIx0fj0n3zjfA_Hkzwkk90TPyNVhYz_n7xd19NcdKYDYNcIrkTLxA-xyz";
-
 export const genius_client_id = "LnIGLJSrLWudU9q90TxMiVVWsnP3EgDSgJ8Z_JoY22o-fjzZlcoqgMFIjth8dJQt";
 export const genius_client_secret = "099cE-WQImmJg0gXRM8nimwKFRBiTV7oewrsTVtHGazzBI5U3rtVDjGY6qwF6-Qce1RzKsdBPmLXBGVWYITheQ";
 export const genius_redirect_uri = "http://localhost:3000/geniuscallback";
@@ -50,7 +48,7 @@ export async function getSongArtist(song, artist, access_token) {
         apiKey: access_token,
         title: song,
         artist,
-        optimizeQuery: true
+        optimizeQuery: false
     })
 }
 
