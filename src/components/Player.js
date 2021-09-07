@@ -39,7 +39,7 @@ class Player extends React.Component {
                     const title = data.item.name;
                     const artist = data.item.artists[0].name;
                     //this.findLyricsGenius(song, artist, genius_access_token);
-                    geniusService.getSongArtist(title, artist)
+                    geniusService.getSongArtist(title, artist, genius_access_token)
                         .then(song => {
                             this.setState({
                                 status: "success",
