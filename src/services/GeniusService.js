@@ -45,9 +45,9 @@ export async function scrapeSongLyrics(song_path) {
     return fetch(`${cors_proxy}/https://genius.com${song_path}`)
 }
 
-export async function getSongArtist(song, artist) {
+export async function getSongArtist(song, artist, access_token) {
     return geniusAPI.getSong({
-        apiKey: genius_api_key,
+        apiKey: access_token,
         title: song,
         artist,
         optimizeQuery: true
