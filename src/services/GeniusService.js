@@ -1,8 +1,12 @@
 // genius dashboard: maxpinheiro181,
+import geniusAPI from 'genius-lyrics-api';
+
+const genius_api_key = "z-8S8YhMIx0fj0n3zjfA_Hkzwkk90TPyNVhYz_n7xd19NcdKYDYNcIrkTLxA-xyz";
 
 export const genius_client_id = "LnIGLJSrLWudU9q90TxMiVVWsnP3EgDSgJ8Z_JoY22o-fjzZlcoqgMFIjth8dJQt";
 export const genius_client_secret = "099cE-WQImmJg0gXRM8nimwKFRBiTV7oewrsTVtHGazzBI5U3rtVDjGY6qwF6-Qce1RzKsdBPmLXBGVWYITheQ";
-export const genius_redirect_uri = "http://localhost:3000/geniuscallback"
+export const genius_redirect_uri = "http://localhost:3000/geniuscallback";
+const cors_proxy = "https://salty-wildwood-08581.herokuapp.com";
 
 export async function getAccessToken(auth_code) {
     return fetch('https://api.genius.com/oauth/token', {
@@ -21,11 +25,34 @@ export async function getAccessToken(auth_code) {
     }).then(res =>  res.json())
 }
 
-export async function getLyricsForSong(song, artist, access_token) {
-    return fetch(`http://api.genius.com/search?q=${song} ${artist}`, {
+export async function searchSong(song, artist, access_token) {
+    return fetch(`${cors_proxy}/http://api.genius.com/search?q=${song} ${artist}`, {
         headers: {
-            "Access-Control-Allow-Origin": "*",
             "Authorization": `Bearer ${access_token}`
         }
     }).then(res =>  res.json())
 }
+
+export async function getSong(song_id, access_token) {
+    return fetch(`${cors_proxy}/http://api.genius.com/songs/${song_id}?text_format=html`, {
+        headers: {
+            "Authorization": `Bearer ${access_token}`
+        }
+    }).then(res =>  res.json())
+}
+
+export async function scrapeSongLyrics(song_path) {
+    return fetch(`${cors_proxy}/https://genius.com${song_path}`)
+}
+
+export async function getSongArtist(song, artist) {
+    return geniusAPI.getSong({
+        apiKey: genius_api_key,
+        title: song,
+        artist,
+        optimizeQuery: true
+    })
+}
+
+const geniusService = {getAccessToken, searchSong, getSong, scrapeSongLyrics, getSongArtist};
+export default geniusService;

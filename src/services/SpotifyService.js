@@ -52,5 +52,5 @@ export async function getCurrentTrack(access_token) {
     }).then(res =>  res.json())
 }
 
-//const service = {authorize, generateRandomString};
-//export default service;
+const spotifyService = {getTokens, getCurrentPlayback, getCurrentTrack};
+export default spotifyService;
