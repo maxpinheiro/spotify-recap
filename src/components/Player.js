@@ -3,9 +3,13 @@ import spotifyService from "../services/SpotifyService";
 import geniusService from "../services/GeniusService";
 import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
 import Loader from "react-loader-spinner";
+import {PhotoshopPicker} from "react-color";
 
 const queryString = require('query-string');
 
+const themeNames = ['light', 'dark', 'green'];
+const bgThemes = ['bg-white', 'bg-gray-800', 'bg-green-600'];
+const textColorThemes = ['text-black', 'text-gray-50', 'text-white'];
 
 class Player extends React.Component {
 
@@ -21,6 +25,10 @@ class Player extends React.Component {
         };
         this.state = {
             status: "success",
+            themeIdx: 0,
+            displayColorPicker: false,
+            customColor: "#2CB06E",
+            customTextClass: "text-black",
             song: {
                 title: "Sweet",
                 artist: "Bren Joy",
@@ -64,6 +72,9 @@ class Player extends React.Component {
                     "It would be an honor"
             }
         };
+        this.handleColorPicked = this.handleColorPicked.bind(this);
+        this.handleColorAccepted = this.handleColorAccepted.bind(this);
+        this.handleColorClosed = this.handleColorClosed.bind(this);
     }
 
     componentDidMount() {
@@ -72,9 +83,9 @@ class Player extends React.Component {
         const {spotify_access_token, spotify_refresh_token, spotify_expires_in, genius_access_token} = queryString.parse(this.props.location.search);
         //console.log({spotify_access_token, spotify_refresh_token, spotify_expires_in, genius_access_token});
         if (spotify_access_token && genius_access_token) {
-            //this.findCurrentSong(spotify_access_token, genius_access_token);
+            this.findCurrentSong(spotify_access_token, genius_access_token);
         }
-
+        //this.setTheme(0);
     }
 
     findCurrentSong(spotify_access_token, genius_access_token) {
@@ -105,27 +116,27 @@ class Player extends React.Component {
                     });
                 }
             }).catch(e => {})
-        /*
-        geniusService.searchSong(song, artist, genius_access_token)
-            .then(result => {
-                //console.log(result);
-                if (result && result.response && result.response.hits) {
-                    const song_id = result.response.hits[0].result.id;
-                    geniusService.getSong(song_id, genius_access_token)
-                        .then(res => {
-                            console.log(res);
-                            if (res && res.response && res.response.song) {
-                                const path = res.response.song.path;
-                                const fullTitle = res.response.song.full_title;
-                                geniusService.scrapeSongLyrics(path)
-                                    .then(d => console.log(d.body))
-                            }
-                        }).catch(e => {
+    }
 
-                    })
-                }
-            }).catch(e => {})
-         */
+    setTheme(theme_idx) {
+        if (theme_idx < 0) return;
+        document.body.style.backgroundColor = '';
+        document.body.classList.remove(...bgThemes);
+        document.body.classList.add(bgThemes[theme_idx]);
+        this.setState(prevState => ({...prevState, themeIdx: theme_idx}));
+    }
+
+    handleColorPicked(color) {
+        this.setState(prevState => ({...prevState, customColor: color.hex, customTextClass: color.hsv.v < 0.5 ? 'text-white' : 'text-black'}));
+    }
+
+    handleColorAccepted() {
+        document.body.style.backgroundColor = this.state.customColor;
+        this.setState(prevState => ({...prevState, showColorPicker: false, themeIdx: -1}));
+    }
+
+    handleColorClosed() {
+        this.setState(prevState => ({...prevState, showColorPicker: false}));
     }
 
 
@@ -141,8 +152,15 @@ class Player extends React.Component {
                 }
                 {
                     this.state.status === "success" && this.state.song &&
-                    <div className="font-sans">
-                        <div className="flex justify-center items-end my-3">
+                    <div className={`font-sans ${textColorThemes[this.state.themeIdx]|| this.state.customTextClass}`}>
+                        <div className="sticky ">
+                            {themeNames.map((name, idx) => (
+                                <button className={`btn ${bgThemes[idx]} ${textColorThemes[idx]}`} onClick={() => this.setTheme(idx)} key={idx} >{name}</button>
+                            ))}
+                            <button className={`btn ${bgThemes[0]} ${textColorThemes[0]}`} onClick={() => this.setState(prevState => ({...prevState, showColorPicker: true}))}>custom</button>
+                            {this.state.showColorPicker && <PhotoshopPicker onChangeComplete={this.handleColorPicked} onAccept={this.handleColorAccepted} onCancel={this.handleColorClosed} color={this.state.customColor}/>}
+                        </div>
+                        <div className="flex justify-center items-baseline my-3">
                             <p className="text-xl font-medium">{this.state.song.title}</p>
                             <pre className="font-sans"> by </pre>
                             <p className="text-xl font-medium"> {this.state.song.artist}</p>
