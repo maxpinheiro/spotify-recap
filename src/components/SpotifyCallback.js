@@ -28,6 +28,7 @@ class SpotifyCallback extends React.Component {
     render() {
         return (
             <div className="container mx-auto my-3 text-center">
+                <div style={{height: "30vh"}} />
                 {
                     this.state.status === "loading" && LoadingMessage("Logging you in...")
                 }
@@ -35,7 +36,7 @@ class SpotifyCallback extends React.Component {
                     this.state.status === "success" && this.state.auth_code &&
                     <div>
                         <p>Almost done! Now we need you to authorize through Genius so we can retrieve song lyrics.</p>
-                        <div className="flex">
+                        <div className="flex my-3">
                             <a href={`https://api.genius.com/oauth/authorize?client_id=${genius_client_id}&redirect_uri=${genius_redirect_uri}&scope=me&state=${this.state.auth_code}&response_type=token`}
                                className="rounded bg-green-400 p-3 mx-auto">
                                 Login through Genius
@@ -46,7 +47,7 @@ class SpotifyCallback extends React.Component {
                 {
                     this.state.status === "error" &&
                     <span>
-                        <p>There was an issue logging in{this.state.error && `: ${this.state.message}`}. Please login again through the home page.</p>
+                        <p className="mb-3">There was an issue logging in{this.state.error && `: ${this.state.message}`}. Please login again through the home page.</p>
                         <div className="flex">
                             <Link to="/" className="rounded bg-green-400 p-3 mx-auto">Home page</Link>
                         </div>

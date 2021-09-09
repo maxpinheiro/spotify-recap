@@ -52,5 +52,14 @@ export async function getCurrentTrack(access_token) {
     }).then(res => (res.status === 204 ? {} : res.json()))
 }
 
-const spotifyService = {getTokens, getCurrentPlayback, getCurrentTrack};
+export async function getAudioFeatures(spotifyId, access_token) {
+    return fetch(`https://api.spotify.com/v1/audio-features/${spotifyId}`, {
+        headers: {
+            "Content-Type": 'application/json',
+            Authorization: `Bearer ${access_token}`
+        }
+    }).then(res => res.json())
+}
+
+const spotifyService = {getTokens, getCurrentPlayback, getCurrentTrack, getAudioFeatures};
 export default spotifyService;

@@ -31,7 +31,7 @@ export async function searchSong(song, artist, access_token) {
     }).then(res =>  res.json())
 }
 
-export async function getSong(song_id, access_token) {
+export async function getSongDetails(song_id, access_token) {
     return fetch(`${cors_proxy}/http://api.genius.com/songs/${song_id}?text_format=html`, {
         headers: {
             "Authorization": `Bearer ${access_token}`
@@ -39,9 +39,6 @@ export async function getSong(song_id, access_token) {
     }).then(res =>  res.json())
 }
 
-export async function scrapeSongLyrics(song_path) {
-    return fetch(`${cors_proxy}/https://genius.com${song_path}`)
-}
 
 export async function getSongArtist(song, artist, access_token) {
     return geniusAPI.getSong({
@@ -52,5 +49,5 @@ export async function getSongArtist(song, artist, access_token) {
     })
 }
 
-const geniusService = {getAccessToken, searchSong, getSong, scrapeSongLyrics, getSongArtist};
+const geniusService = {getAccessToken, searchSong, getSongDetails, getSongArtist};
 export default geniusService;

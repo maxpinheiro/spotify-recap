@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {BrowserRouter as Router, Switch, Route} from 'react-router-dom';
+import {BrowserRouter as Router, Switch, Route, Link} from 'react-router-dom';
 import './index.css';
 import Home from "./components/Home";
 import Player from "./components/Player";
@@ -10,6 +10,7 @@ import GeniusCallback from "./components/GeniusCallback";
 ReactDOM.render(
   <React.StrictMode>
     <Router>
+        <Link to='/'><p className="text-green-400 m-3">Home</p></Link>
         <Switch>
             <Route path="/spotifycallback" component={SpotifyCallback} />
             <Route path="/geniuscallback" component={GeniusCallback} />

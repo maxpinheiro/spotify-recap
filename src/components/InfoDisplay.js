@@ -1,9 +1,14 @@
 import React from 'react';
 import {PhotoshopPicker} from "react-color";
+import CanvasJSReact from "../canvasjs.react";
+import ReactHtmlParser from 'react-html-parser';
+const CanvasJSChart = CanvasJSReact.CanvasJSChart;
 
 const themeNames = ['light', 'dark', 'green', 'blue'];
 const bgThemes = ['bg-white', 'bg-gray-800', 'bg-green-600', 'bg-blue-500'];
+const bgHexThemes = ['#FFF', '#202A37', '#059669', '#3B82F6'];
 const textColorThemes = ['text-black', 'text-gray-50', 'text-white', 'text-white'];
+const keys = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
 class InfoDisplay extends React.Component {
 
@@ -14,11 +19,27 @@ class InfoDisplay extends React.Component {
             artist: props.artist,
             albumArtUrl: props.albumArtUrl,
             lyrics: props.lyrics,
+            audioFeatures: {
+                acousticness: props.audioFeatures.acousticness, // [0, 1]
+                danceability: props.audioFeatures.danceability, // [0, 1]
+                duration_ms:  props.audioFeatures.duration_ms,
+                energy: props.audioFeatures.energy, // [0, 1]
+                instrumentalness: props.audioFeatures.instrumentalness, // [0, 1], above 0.5 = instrumental
+                key: props.audioFeatures.key, // 0 = C, 1 = C# / Db, 2 = D...
+                liveness: props.audioFeatures.liveness, // value above 0.8 = likely track is live
+                loudness: props.audioFeatures.loudness, // [-60, 0] db (typical range)
+                mode:  props.audioFeatures.mode, // 1 = major, 0 = minor
+                speechiness: props.audioFeatures.speechiness, // [0, 1]
+                tempo: Math.round(props.audioFeatures.tempo), // bpm
+                time_signature: props.audioFeatures.time_signature, // meter (number of beats per bar)
+                valence: props.audioFeatures.valence // [0, 1]
+            },
+            description: props.description,
             themeIdx: 0,
             displayColorPicker: false,
             customColor: "",
             customTextClass: "",
-            showMore: false
+            showMore: true
         };
 
         this.handleColorPicked = this.handleColorPicked.bind(this);
@@ -27,6 +48,7 @@ class InfoDisplay extends React.Component {
     }
 
     componentDidMount() {
+        console.log(this.state.description, typeof  this.state.description)
     }
 
     setTheme(theme_idx) {
@@ -56,6 +78,12 @@ class InfoDisplay extends React.Component {
         return `${newBg} ${newText}`;
     }
 
+    millisecondsToFormatted(time_ms) {
+        const time_s = Math.floor(time_ms / 1000);
+        const seconds = time_s % 60;
+        return `${Math.floor(time_s / 60)}:${seconds < 10 ? '0' : ''}${seconds}`;
+    }
+
 
     render() {
         return (
@@ -82,11 +110,32 @@ class InfoDisplay extends React.Component {
                     </button>
                     {
                         this.state.showMore &&
-                        <div>
-
+                        <div className="rounded border border-gray p-4 my-3">
+                            {ReactHtmlParser(this.state.description)}
+                            <div className="md:grid md:grid-cols-5">
+                                <p className="my-2">Duration: {this.millisecondsToFormatted(this.state.audioFeatures.duration_ms)}</p>
+                                <p className="my-2">Key: {keys[this.state.audioFeatures.key]} | Mode: {(["minor", "major"])[this.state.audioFeatures.mode]}</p>
+                                <p className="my-2">Tempo: {this.state.audioFeatures.tempo} bpm</p>
+                                <p className="my-2">Time signature: {this.state.audioFeatures.time_signature}</p>
+                                <p className="my-2">Loudness: {this.state.audioFeatures.loudness} db</p>
+                            </div>
+                            {/*<div className="w-1/2 border border-top border-gray my-3 mx-auto" />*/}
+                            <CanvasJSChart options={
+                                {
+                                    backgroundColor: bgHexThemes[this.state.themeIdx] || this.state.customColor,
+                                    data: [{
+                                        // Change type to "doughnut", "line", "splineArea", etc.
+                                        type: "column",
+                                        dataPoints: (["acousticness", "danceability", "energy", "instrumentalness", "speechiness", "valence"]).map(feature => (
+                                            {label: feature, y: this.state.audioFeatures[feature] || 0}
+                                        ))
+                                    }
+                                    ]
+                                }
+                            } />
                         </div>
                     }
-                    <pre className="text-center font-sans my-3">{this.state.lyrics}</pre>
+                    <pre className="text-center font-sans my-3">{this.state.lyrics || "[ No Lyrics ]"}</pre>
                 </div>
             </div>
         )

@@ -1,5 +1,5 @@
 import React from 'react';
-import {getTokens} from '../services/SpotifyService';
+import spotifyService from '../services/SpotifyService';
 import { Link } from 'react-router-dom';
 import {LoadingMessage} from "./Home";
 
@@ -27,7 +27,7 @@ class GeniusCallback extends React.Component {
     }
 
     async getTokens(spotify_code, genius_token) {
-        getTokens(spotify_code).then(spotifyData => {
+        spotifyService.getTokens(spotify_code).then(spotifyData => {
             if (spotifyData.access_token) {
                 this.setState({status: "success", spotify_access_token: spotifyData.access_token, spotify_refresh_token: spotifyData.refresh_token, spotify_expires_in: spotifyData.expires_in, genius_access_token: genius_token});
             } else if (spotifyData.error) {
@@ -41,6 +41,7 @@ class GeniusCallback extends React.Component {
     render() {
         return (
             <div className="container mx-auto my-3 text-center">
+                <div style={{height: "30vh"}} />
                 {
                     this.state.status === "loading" && LoadingMessage("Logging you in...")
                 }
@@ -54,7 +55,7 @@ class GeniusCallback extends React.Component {
                 {
                     this.state.status === "error" &&
                     <span>
-                        <p>There was an issue logging in{this.state.message && `: ${this.state.message}`}. Please login again through the home page.</p>
+                        <p className="mb-3">There was an issue logging in{this.state.message && `: ${this.state.message}`}. Please login again through the home page.</p>
                         <div className="flex">
                             <Link to="/" className="rounded bg-green-400 p-3 mx-auto">Home page</Link>
                         </div>
