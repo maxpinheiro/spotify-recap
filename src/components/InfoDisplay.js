@@ -1,7 +1,6 @@
 import React from 'react';
 import {PhotoshopPicker} from "react-color";
 import CanvasJSReact from "../canvasjs.react";
-import ReactHtmlParser from 'react-html-parser';
 const CanvasJSChart = CanvasJSReact.CanvasJSChart;
 
 const themeNames = ['light', 'dark', 'green', 'blue'];
@@ -35,11 +34,13 @@ class InfoDisplay extends React.Component {
                 valence: props.audioFeatures.valence // [0, 1]
             },
             description: props.description,
+            geniusUrl: props.geniusUrl,
             themeIdx: 0,
             displayColorPicker: false,
             customColor: "",
             customTextClass: "",
-            showMore: true
+            showMore: false,
+            refreshPlayer: props.refreshPlayer
         };
 
         this.handleColorPicked = this.handleColorPicked.bind(this);
@@ -48,7 +49,6 @@ class InfoDisplay extends React.Component {
     }
 
     componentDidMount() {
-        console.log(this.state.description, typeof  this.state.description)
     }
 
     setTheme(theme_idx) {
@@ -89,6 +89,11 @@ class InfoDisplay extends React.Component {
         return (
             <div className="container mx-auto text-center font-sans my-3">
                 <div className={textColorThemes[this.state.themeIdx]|| this.state.customTextClass}>
+                    <button onClick={this.props.refreshPlayer}
+                            className={`mx-auto mb-4 block rounded-lg p-3 ${this.state.themeIdx >= 0 && this.invertBackgroundTextColors(bgThemes[this.state.themeIdx], textColorThemes[this.state.themeIdx])}`}
+                            style={this.state.themeIdx === -1 ? {backgroundColor: "#FFF", color: this.state.customColor} : {}}>
+                        Refresh Player
+                    </button>
                     <div className="sticky flex justify-center items-baseline">
                         <p>Theme: </p>
                         {themeNames.map((name, idx) => (
@@ -102,6 +107,7 @@ class InfoDisplay extends React.Component {
                         <pre className="font-sans"> by </pre>
                         <p className="text-xl font-medium"> {this.state.artist}</p>
                     </div>
+
                     <img className="mx-auto my-3 md:w-1/4 md:h-1/4" src={this.state.albumArtUrl} alt=""/>
                     <button onClick={() => this.setState(prevState => ({...prevState, showMore: !prevState.showMore}))}
                             className={`rounded-lg p-3 ${this.state.themeIdx >= 0 && this.invertBackgroundTextColors(bgThemes[this.state.themeIdx], textColorThemes[this.state.themeIdx])}`}
@@ -111,7 +117,8 @@ class InfoDisplay extends React.Component {
                     {
                         this.state.showMore &&
                         <div className="rounded border border-gray p-4 my-3">
-                            {ReactHtmlParser(this.state.description)}
+                            {this.state.description === "?" ? "[ No description available ]" : `Description: ${this.state.description}`}
+                            <a href={this.state.geniusUrl} className="block my-2">Genius Page</a>
                             <div className="md:grid md:grid-cols-5">
                                 <p className="my-2">Duration: {this.millisecondsToFormatted(this.state.audioFeatures.duration_ms)}</p>
                                 <p className="my-2">Key: {keys[this.state.audioFeatures.key]} | Mode: {(["minor", "major"])[this.state.audioFeatures.mode]}</p>

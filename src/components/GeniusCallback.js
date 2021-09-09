@@ -48,7 +48,7 @@ class GeniusCallback extends React.Component {
                 {
                     this.state.status === "success" &&
                     <div>
-                        <Link to={`/player?spotify_access_token=${this.state.spotify_access_token}&spotify_refresh_token=${this.state.spotify_refresh_token}&spotify_expires_in=${this.state.spotify_expires_in}&genius_access_token=${this.state.genius_access_token}`}
+                        <Link to={`/player?spotify_access_token=${this.state.spotify_access_token}&spotify_refresh_token=${this.state.spotify_refresh_token}&spotify_expires_in=${this.state.spotify_expires_in}&genius_access_token=${this.state.genius_access_token}&startTimeMs=${Date.now()}`}
                               className="rounded bg-green-400 p-3">Continue to Player</Link>
                     </div>
                 }

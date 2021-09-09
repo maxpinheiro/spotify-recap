@@ -24,7 +24,7 @@ export async function getAccessToken(auth_code) {
 }
 
 export async function searchSong(song, artist, access_token) {
-    return fetch(`${cors_proxy}/http://api.genius.com/search?q=${song} ${artist}`, {
+    return fetch(`${cors_proxy}/http://api.genius.com/search?q=${song.replace('%', '')} ${artist}`, {
         headers: {
             "Authorization": `Bearer ${access_token}`
         }
@@ -32,7 +32,7 @@ export async function searchSong(song, artist, access_token) {
 }
 
 export async function getSongDetails(song_id, access_token) {
-    return fetch(`${cors_proxy}/http://api.genius.com/songs/${song_id}?text_format=html`, {
+    return fetch(`${cors_proxy}/http://api.genius.com/songs/${song_id}?text_format=plain`, {
         headers: {
             "Authorization": `Bearer ${access_token}`
         }

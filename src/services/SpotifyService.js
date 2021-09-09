@@ -34,6 +34,20 @@ export async function getTokens(auth_code) {
     }).then(res =>  res.json()).catch(e => e.json())
 }
 
+export async function refreshTokens(refresh_token) {
+    return fetch('https://accounts.spotify.com/api/token', {
+        method: 'POST',
+        headers: {
+            "Content-Type": 'application/x-www-form-urlencoded',
+        },
+        body: {
+            grant_type: "refresh_token",
+            refresh_token,
+            client_id: spotify_client_id
+        }
+    }).then(res =>  res.json()).catch(e => e.json())
+}
+
 export async function getCurrentPlayback(access_token) {
     return fetch('https://api.spotify.com/v1/me/player', {
         headers: {
@@ -61,5 +75,5 @@ export async function getAudioFeatures(spotifyId, access_token) {
     }).then(res => res.json())
 }
 
-const spotifyService = {getTokens, getCurrentPlayback, getCurrentTrack, getAudioFeatures};
+const spotifyService = {getTokens, refreshTokens, getCurrentPlayback, getCurrentTrack, getAudioFeatures};
 export default spotifyService;
