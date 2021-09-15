@@ -15,6 +15,22 @@ export const generateRandomString = (length) => {
 
 export const jsonToUrlEncoded = (obj) => Object.keys(obj).map(key => encodeURIComponent(key) + '=' + encodeURIComponent(obj[key])).join('&');
 
+/*
+* Response object:
+* success (200 status in header):
+*  {
+   "access_token": "NgCXRK...MzYjw",
+   "token_type": "Bearer",
+   "scope": "user-read-private user-read-email",
+   "expires_in": 3600,
+   "refresh_token": "NgAagA...Um_SHo"
+}
+* error (400 status in header):
+*   {
+*   "error": "invalid_grant",
+*   "error_description": "Invalid authorization code"
+*   }
+*/
 export async function getTokens(auth_code) {
     const body = {
         grant_type: "authorization_code",
@@ -22,7 +38,6 @@ export async function getTokens(auth_code) {
         redirect_uri: spotify_redirect_uri
     };
     const encoded = jsonToUrlEncoded(body);
-    //console.log('service: get tokens')
 
     return fetch('https://accounts.spotify.com/api/token', {
         method: 'POST',
@@ -31,30 +46,55 @@ export async function getTokens(auth_code) {
             Authorization: 'Basic ' + window.btoa(`${spotify_client_id}:${spotify_client_secret}`)
         },
         body: encoded
-    }).then(res =>  res.json()).catch(e => e.json())
+    }).then(res =>  res.json().then(data => {
+        return new Promise((resolve, reject) => {
+            if (data.hasOwnProperty("access_token") && data.hasOwnProperty("refresh_token") && data.hasOwnProperty("expires_in")) {
+                resolve({success: true, accessToken: data.access_token, refreshToken: data.refresh_token, expiresIn: data.expires_in});
+            } else if (data.hasOwnProperty("error") && data.hasOwnProperty("error_description")) {
+                resolve({success: false, errorMessage: data.error_description});
+            } else {
+                resolve({success: false, errorMessage: "unknown error"});
+            }
+        })
+    })).catch(e => {console.log("TOKEN ERROR: ", e); return e.json()})
 }
 
+/*
+* Response object:
+* success (200 status in header):
+*  {
+   "access_token": "NgCXRK...MzYjw",
+   "token_type": "Bearer",
+   "scope": "user-read-private user-read-email",
+   "expires_in": 3600
+}
+*
+*/
 export async function refreshTokens(refresh_token) {
+    const body = {
+        grant_type: "refresh_token",
+        refresh_token
+    };
+    const encoded = jsonToUrlEncoded(body);
+
     return fetch('https://accounts.spotify.com/api/token', {
         method: 'POST',
         headers: {
             "Content-Type": 'application/x-www-form-urlencoded',
+            Authorization: 'Basic ' + window.btoa(`${spotify_client_id}:${spotify_client_secret}`)
         },
-        body: {
-            grant_type: "refresh_token",
-            refresh_token,
-            client_id: spotify_client_id
-        }
-    }).then(res =>  res.json()).catch(e => e.json())
-}
-
-export async function getCurrentPlayback(access_token) {
-    return fetch('https://api.spotify.com/v1/me/player', {
-        headers: {
-            "Content-Type": 'application/json',
-            Authorization: `Bearer ${access_token}`
-        }
-    }).then(res =>  res.json())
+        body: encoded
+    }).then(res =>  res.json().then(data => {
+        return new Promise(resolve => {
+            if (data.hasOwnProperty("access_token") && data.hasOwnProperty("expires_in")) {
+                resolve({success: true, accessToken: data.access_token, expiresIn: data.expires_in});
+            } else if (data.hasOwnProperty("error") && data.hasOwnProperty("error_description")) {
+                resolve({success: false, errorMessage: data.error_description});
+            } else {
+                resolve({success: false, errorMessage: "unknown error"});
+            }
+        })
+    })).catch(e => e.json())
 }
 
 export async function getCurrentTrack(access_token) {
@@ -63,7 +103,25 @@ export async function getCurrentTrack(access_token) {
             "Content-Type": 'application/json',
             Authorization: `Bearer ${access_token}`
         }
-    }).then(res => (res.status === 204 ? {} : res.json()))
+    }).then(res => {
+        if (res.status === 204) {
+            return new Promise(resolve => resolve({success: false, playing: false}))
+        } else {
+            return res.json().then(data => {
+                return new Promise(resolve => {
+                    if (data.hasOwnProperty("item") && data.item.hasOwnProperty("name") && data.item.hasOwnProperty("artists")) {
+                        const song = data.item.name;
+                        const artist = data.item.artists[0].name;
+                        const spotifyId = data.item.id;
+                        const albumArtUrl = data.item.album.images[0].url;
+                        resolve({success: true, song, artist, spotifyId, albumArtUrl});
+                    } else {
+                        resolve({success: false, errorMessage: "unknown error"});
+                    }
+                })
+            })
+        }
+    })
 }
 
 export async function getAudioFeatures(spotifyId, access_token) {
@@ -72,8 +130,53 @@ export async function getAudioFeatures(spotifyId, access_token) {
             "Content-Type": 'application/json',
             Authorization: `Bearer ${access_token}`
         }
-    }).then(res => res.json())
+    }).then(res => res.json().then(data => {
+        return new Promise(resolve => {
+            if (data.hasOwnProperty("danceability")) {
+                resolve({success: true, audioFeatures: {
+                        danceability: data.danceability,
+                        energy: data.energy,
+                        key: data.key,
+                        loudness: data.loudness,
+                        mode:  data.mode,
+                        speechiness: data.speechiness,
+                        acousticness: data.acousticness,
+                        instrumentalness: data.instrumentalness,
+                        liveness: data.liveness,
+                        valence: data.valence,
+                        tempo: data.tempo,
+                        type: data.type,
+                        duration_ms: data.duration_ms,
+                        time_signature: data.time_signature
+                    }})
+            } else {
+                resolve({success: false});
+            }
+        })
+    }))
 }
 
-const spotifyService = {getTokens, refreshTokens, getCurrentPlayback, getCurrentTrack, getAudioFeatures};
+export async function searchSongs(query, access_token) {
+    return fetch(`https://api.spotify.com/v1/search?q=${query}&type=track&limit=10`, {
+        headers: {
+            "Content-Type": 'application/json',
+            Authorization: `Bearer ${access_token}`
+        }
+    }).then(res => res.json().then(data => {
+        return new Promise(resolve => {
+            if (data.hasOwnProperty("tracks")) {
+                const tracks = data.tracks.items;
+                const concatArtists = (artists) => (artists.join(', '));
+                const songs = tracks.map(track => ({name: track.name, artist: concatArtists(track.artists.map(a => a.name)), spotifyId: track.id, imageUrl: track.album.images[0].url}));
+                resolve({success: true, songs});
+            } else if (data.hasOwnProperty("error")) {
+                resolve({success: false, errorMessage: data.message});
+            } else {
+                resolve({success: false, errorMessage: "unknown error"});
+            }
+        })
+    }))
+}
+
+const spotifyService = {getTokens, refreshTokens, getCurrentTrack, getAudioFeatures, searchSongs};
 export default spotifyService;

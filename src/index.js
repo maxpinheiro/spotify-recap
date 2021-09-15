@@ -3,7 +3,8 @@ import ReactDOM from 'react-dom';
 import {BrowserRouter as Router, Switch, Route, Link} from 'react-router-dom';
 import './index.css';
 import Home from "./components/Home";
-import Player from "./components/Player";
+import LyricPlayer from "./components/LyricPlayer";
+import VisualizerContainer from "./components/VisualizerContainer";
 import SpotifyCallback from "./components/SpotifyCallback";
 import GeniusCallback from "./components/GeniusCallback";
 
@@ -14,7 +15,8 @@ ReactDOM.render(
         <Switch>
             <Route path="/spotifycallback" component={SpotifyCallback} />
             <Route path="/geniuscallback" component={GeniusCallback} />
-            <Route path="/player" component={Player} />
+            <Route path="/player" component={LyricPlayer} />
+            <Route path="/visualizer" component={VisualizerContainer} />
             <Route exact path="/" component={Home} />
         </Switch>
     </Router>

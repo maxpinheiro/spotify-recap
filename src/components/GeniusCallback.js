@@ -12,10 +12,10 @@ class GeniusCallback extends React.Component {
         super(props);
         this.state = {
             status: "loading",
-            spotify_access_token: undefined,
-            spotify_refresh_token: undefined,
-            spotify_expires_in: undefined,
-            genius_access_token: undefined
+            spotifyAccessToken: undefined,
+            spotifyRefreshToken: undefined,
+            spotifyExpiresIn: undefined,
+            geniusAccessToken: undefined
         };
     }
 
@@ -26,12 +26,12 @@ class GeniusCallback extends React.Component {
         if (access_token && state) setTimeout(() => this.getTokens(state, access_token), 1000);
     }
 
-    async getTokens(spotify_code, genius_token) {
-        spotifyService.getTokens(spotify_code).then(spotifyData => {
-            if (spotifyData.access_token) {
-                this.setState({status: "success", spotify_access_token: spotifyData.access_token, spotify_refresh_token: spotifyData.refresh_token, spotify_expires_in: spotifyData.expires_in, genius_access_token: genius_token});
-            } else if (spotifyData.error) {
-                this.setState({status: "error", message: spotifyData.error_description});
+    async getTokens(spotifyCode, geniusToken) {
+        spotifyService.getTokens(spotifyCode).then(data => {
+            if (data.success) {
+                this.setState({status: "success", spotifyAccessToken: data.accessToken, spotifyRefreshToken: data.refreshToken, spotifyExpiresIn: data.expiresIn, geniusAccessToken: geniusToken});
+            } else {
+                this.setState({status: "error", message: data.errorMessage});
             }
         }).catch(e => {
             this.setState({status: "error", message: e});
@@ -47,9 +47,11 @@ class GeniusCallback extends React.Component {
                 }
                 {
                     this.state.status === "success" &&
-                    <div>
-                        <Link to={`/player?spotify_access_token=${this.state.spotify_access_token}&spotify_refresh_token=${this.state.spotify_refresh_token}&spotify_expires_in=${this.state.spotify_expires_in}&genius_access_token=${this.state.genius_access_token}&startTimeMs=${Date.now()}`}
-                              className="rounded bg-green-400 p-3">Continue to Player</Link>
+                    <div className="flex flex-col">
+                        <Link to={`/player?spotifyAccessToken=${this.state.spotifyAccessToken}&spotifyRefreshToken=${this.state.spotifyRefreshToken}&spotifyExpiresIn=${this.state.spotifyExpiresIn}&geniusAccessToken=${this.state.geniusAccessToken}&startTimeMs=${Date.now()}`}
+                              className="rounded bg-green-200 border-green-800 text-green-800 p-3 mb-3">Continue to Player</Link>
+                        <Link to={`/visualizer?spotifyAccessToken=${this.state.spotifyAccessToken}&spotifyRefreshToken=${this.state.spotifyRefreshToken}&spotifyExpiresIn=${this.state.spotifyExpiresIn}&startTimeMs=${Date.now()}`}
+                              className="rounded bg-green-800 border-green-200 text-green-200 p-3 mb-3">(In Production) Visualizer</Link>
                     </div>
                 }
                 {

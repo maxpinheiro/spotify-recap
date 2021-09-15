@@ -51,12 +51,25 @@ class InfoDisplay extends React.Component {
     componentDidMount() {
     }
 
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (prevState.themeIdx === -2 && prevState.title !== this.state.title) this.setTheme(0);
+    }
+
+
     setTheme(theme_idx) {
-        if (theme_idx < 0) return;
-        document.body.style.backgroundColor = '';
-        document.body.classList.remove(...bgThemes);
-        document.body.classList.add(bgThemes[theme_idx]);
-        this.setState(prevState => ({...prevState, themeIdx: theme_idx}));
+        if (theme_idx >= 0) {
+            document.body.style.backgroundColor = '';
+            document.body.style.backgroundImage = '';
+            document.body.style.backdropFilter = '';
+            document.body.classList.remove(...bgThemes);
+            document.body.classList.add(bgThemes[theme_idx]);
+            this.setState(prevState => ({...prevState, themeIdx: theme_idx}));
+        } else if (theme_idx === -2) {
+            document.body.style.backgroundImage = `url(${this.state.albumArtUrl})`;
+            document.body.style.backdropFilter = 'blur(5px)';
+            this.setState(prevState => ({...prevState, themeIdx: theme_idx}));
+        }
+
     }
 
     handleColorPicked(color) {
@@ -91,7 +104,7 @@ class InfoDisplay extends React.Component {
                 <div className={textColorThemes[this.state.themeIdx]|| this.state.customTextClass}>
                     <button onClick={this.props.refreshPlayer}
                             className={`mx-auto mb-4 block rounded-lg p-3 ${this.state.themeIdx >= 0 && this.invertBackgroundTextColors(bgThemes[this.state.themeIdx], textColorThemes[this.state.themeIdx])}`}
-                            style={this.state.themeIdx === -1 ? {backgroundColor: "#FFF", color: this.state.customColor} : {}}>
+                            style={this.state.themeIdx < 0 ? {backgroundColor: "#FFF", color: this.state.customColor} : {}}>
                         Refresh Player
                     </button>
                     <div className="sticky flex justify-center items-baseline">
@@ -100,6 +113,7 @@ class InfoDisplay extends React.Component {
                             <button className={`rounded-lg p-2 ${bgThemes[idx]} ${textColorThemes[idx]}`} onClick={() => this.setTheme(idx)} key={idx} >{name}</button>
                         ))}
                         <button className={`rounded-lg p-2 ${bgThemes[0]} ${textColorThemes[0]}`} onClick={() => this.setState(prevState => ({...prevState, showColorPicker: true}))}>custom</button>
+                        <button className={`rounded-lg p-2 ${bgThemes[1]} ${textColorThemes[1]}`} onClick={() => this.setTheme(-2)}>album cover</button>
                         {this.state.showColorPicker && <PhotoshopPicker onChangeComplete={this.handleColorPicked} onAccept={this.handleColorAccepted} onCancel={this.handleColorClosed} color={this.state.customColor}/>}
                     </div>
                     <div className="flex justify-center items-baseline my-3">
@@ -135,7 +149,11 @@ class InfoDisplay extends React.Component {
                                         type: "column",
                                         dataPoints: (["acousticness", "danceability", "energy", "instrumentalness", "speechiness", "valence"]).map(feature => (
                                             {label: feature, y: this.state.audioFeatures[feature] || 0}
-                                        ))
+                                        )),
+                                        axisY:{
+                                            minimum: 0.0,
+                                            maximum: 1.0,
+                                        }
                                     }
                                     ]
                                 }

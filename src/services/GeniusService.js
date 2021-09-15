@@ -40,14 +40,22 @@ export async function getSongDetails(song_id, access_token) {
 }
 
 
-export async function getSongArtist(song, artist, access_token) {
+export async function getSongLyricsAPI(song, artist, access_token) {
     return geniusAPI.getSong({
         apiKey: access_token,
         title: song,
         artist,
         optimizeQuery: false
-    })
+    }).then(data => {
+        return new Promise(resolve => {
+            if (data.hasOwnProperty("albumArt") && data.hasOwnProperty("lyrics")) {
+                resolve({success: true, albumArtUrl: data.albumArt, lyrics: data.lyrics});
+            } else {
+                resolve({success: false, errorMessage: "unknown error"});
+            }
+        })
+    }).catch(e => new Promise(resolve => resolve({success: false, errorMessage: "unknown error"})));
 }
 
-const geniusService = {getAccessToken, searchSong, getSongDetails, getSongArtist};
+const geniusService = {getAccessToken, searchSong, getSongDetails, getSongLyricsAPI};
 export default geniusService;

@@ -8,10 +8,10 @@ const queryString = require('query-string');
 
 const initialState = {
     status: "loading",
-    spotify_access_token: undefined,
-    spotify_refresh_token: undefined,
-    spotify_expires_in: undefined,
-    genius_access_token: undefined,
+    spotifyAccessToken: undefined,
+    spotifyRefreshToken: undefined,
+    spotifyExpiresIn: undefined,
+    geniusAccessToken: undefined,
     startTimeMs: undefined,
     song: {
         title: undefined,
@@ -39,7 +39,7 @@ const initialState = {
     geniusUrl: undefined
 };
 
-class Player extends React.Component {
+class LyricPlayer extends React.Component {
 
     constructor(props) {
         super(props);
@@ -51,72 +51,57 @@ class Player extends React.Component {
     componentDidMount() {
         // logic: detect current playback, fetch lyrics for song, display info to page
         // extra: use song features for more specific rendering (background? font? color?)
-        const {spotify_access_token, spotify_refresh_token, spotify_expires_in, genius_access_token, startTimeMs} = queryString.parse(this.props.location.search);
-        //console.log({spotify_access_token, spotify_refresh_token, spotify_expires_in, genius_access_token});
-        if (spotify_access_token && genius_access_token) {
-            this.setState(prevState => ({...prevState, spotify_access_token, spotify_refresh_token, spotify_expires_in, genius_access_token, startTimeMs}));
-            this.findCurrentSong(spotify_access_token, genius_access_token);
+        const {spotifyAccessToken, spotifyRefreshToken, spotifyExpiresIn, geniusAccessToken, startTimeMs} = queryString.parse(this.props.location.search);
+        //console.log({spotifyAccessToken, spotifyRefreshToken, spotifyExpiresIn, geniusAccessToken});
+        if (spotifyAccessToken && geniusAccessToken) {
+            this.setState(prevState => ({...prevState, spotifyAccessToken, spotifyRefreshToken, spotifyExpiresIn, geniusAccessToken, startTimeMs}));
+            if (((Date.now() - startTimeMs) / 1000) >= spotifyExpiresIn) {
+                this.refreshPlayer(spotifyRefreshToken);
+            } else {
+                this.findCurrentSong(spotifyAccessToken, geniusAccessToken);
+            }
+        } else {
+            this.setState({status: "error", message: "The player failed to load for an unknown reason. Please refresh the page, or redirect to the home page to restart the authorization flow."})
         }
     }
 
-    findCurrentSong(spotify_access_token, genius_access_token) {
-        spotifyService.getCurrentTrack(spotify_access_token)
+    findCurrentSong(spotifyAccessToken, geniusAccessToken) {
+        spotifyService.getCurrentTrack(spotifyAccessToken)
             .then(data => {
-                if (data.item && data.item.name && data.item.artists && data.item.artists[0].name) {
-                    const song = data.item.name;
-                    const artist = data.item.artists[0].name;
-                    const spotifyId = data.item.id;
-                    this.findLyrics(song, artist, spotifyId, genius_access_token, spotify_access_token);
-                } else if (data.error) {
-                    this.setState({status: "error", message: `There was an error loading the player: ${data.error.message}. Try refreshing the page or redirecting to the home page.`});
+                if (data.success) {
+                    this.findLyrics(data.song, data.artist, data.spotifyId, data.albumArtUrl, geniusAccessToken, spotifyAccessToken);
                 } else {
-                    this.setState({status: "error", message: "No track is currently playing. Please play a track and refresh the page for the lyric player to work."});
+                    if (data.playing === false) {
+                        this.setState({status: "error", message: "No track is currently playing. Please play a track and refresh the page for the lyric player to work."});
+                    } else if (data.error) {
+                        this.setState({status: "error", message: `There was an error loading the player: ${data.error.message}. Try refreshing the page or redirecting to the home page.`});
+                    } else {
+                        this.setState({status: "error", message: "The player failed to load for an unknown reason. Please refresh the page, or redirect to the home page to restart the authorization flow."})
+                    }
                 }
             }).catch(e => {this.setState({status: "error", message: "The player failed to load for an unknown reason. Please refresh the page, or redirect to the home page to restart the authorization flow."})})
     }
 
-    findLyrics(song, artist, spotifyId, genius_access_token, spotify_access_token) {
-        geniusService.getSongArtist(song, artist, genius_access_token)
-            .then(songData => {
-                if (songData.albumArt) {
-                    this.setState(prevState => ({
-                        ...prevState,
-                        song: {
-                            title: song,
-                            artist,
-                            albumArtUrl: songData.albumArt,
-                            lyrics: songData.lyrics
-                        }
-                    }));
-                    this.getSpotifyFeatures(spotifyId, song, artist, spotify_access_token, genius_access_token);
-                }
-            }).catch(e => {this.setState({status: "error", message: "The player failed to load for an unknown reason. Please refresh the page, or redirect to the home page to restart the authorization flow."})})
-    }
-
-    getSpotifyFeatures(spotifyId, song, artist, spotify_access_token, genius_access_token) {
-        spotifyService.getAudioFeatures(spotifyId, spotify_access_token)
+    findLyrics(song, artist, spotifyId, albumArtUrl, geniusAccessToken, spotifyAccessToken) {
+        geniusService.getSongLyricsAPI(song, artist, geniusAccessToken)
             .then(data => {
-                if (data.danceability) {
-                    this.setState(prevState => ({
-                        ...prevState,
-                        audioFeatures: {
-                            danceability: data.danceability,
-                            energy: data.energy,
-                            key: data.key,
-                            loudness: data.loudness,
-                            mode:  data.mode,
-                            speechiness: data.speechiness,
-                            acousticness: data.acousticness,
-                            instrumentalness: data.instrumentalness,
-                            liveness: data.liveness,
-                            valence: data.valence,
-                            tempo: data.tempo,
-                            type: data.type,
-                            duration_ms: data.duration_ms,
-                            time_signature: data.time_signature
-                        }
-                    }));
-                    this.getGeniusData(song, artist, genius_access_token);
+                if (data.success) {
+                    this.setState(prevState => ({...prevState, song: {title: song, artist, albumArtUrl, lyrics: data.lyrics}}));
+                    this.getSpotifyFeatures(spotifyId, song, artist, spotifyAccessToken, geniusAccessToken);
+                } else {
+                    this.setState({status: "error", message: "The player failed to load for an unknown reason. Please refresh the page, or redirect to the home page to restart the authorization flow."})
+                }
+            }).catch(e => {this.setState({status: "error", message: "The player failed to load for an unknown reason. Please refresh the page, or redirect to the home page to restart the authorization flow."})})
+    }
+
+    getSpotifyFeatures(spotifyId, song, artist, spotifyAccessToken, geniusAccessToken) {
+        spotifyService.getAudioFeatures(spotifyId, spotifyAccessToken)
+            .then(data => {
+                if (data.success) {
+                    this.setState(prevState => ({...prevState, audioFeatures: data.audioFeatures }));
+                    this.getGeniusData(song, artist, geniusAccessToken);
+                } else {
+                    this.setState({status: "error", message: "The player failed to load for an unknown reason. Please refresh the page, or redirect to the home page to restart the authorization flow."})
                 }
             }).catch(e => {this.setState({status: "error", message: "The player failed to load for an unknown reason. Please refresh the page, or redirect to the home page to restart the authorization flow."})})
     }
@@ -144,22 +129,36 @@ class Player extends React.Component {
             }).catch(e => {this.setState({status: "error", message: "The player failed to load for an unknown reason. Please refresh the page, or redirect to the home page to restart the authorization flow."})})
     }
 
+    secondsLeft(startTimeMs, expireTimeMs) {
+        const timeSinceStart = (Date.now() - startTimeMs) / 1000;
+        return Math.ceil(expireTimeMs - timeSinceStart);
+    }
+
     refreshPlayer() {
         this.setState(prevState => ({...prevState, status: "loading"}));
         const timeSinceStart = (Date.now() - this.state.startTimeMs) / 1000;
-        const timeLeft = Math.ceil(this.state.spotify_expires_in - timeSinceStart);
-        console.log(`Time left: ${Math.floor(timeLeft / 60)}m ${timeLeft % 60}s | Expired: ${timeSinceStart > this.state.spotify_expires_in}`);
-        if (timeSinceStart > this.state.spotify_expires_in) {
-            spotifyService.refreshTokens(this.state.spotify_refresh_token)
-                .then(res => {
-                    if (res.access_token) {
-                        this.setState(prevState => ({...prevState, spotify_access_token: res.access_token, spotify_refresh_token: res.refresh_token, spotify_expires_in: res.expires_in}));
-                        this.findCurrentSong(res.access_token, this.state.genius_access_token);
-                    }
-                }).catch(e => {this.setState({status: "error", message: "The player failed to load for an unknown reason. Please refresh the page, or redirect to the home page to restart the authorization flow."})})
+        const timeLeft = Math.ceil(this.state.spotifyExpiresIn - timeSinceStart);
+        console.log(`Time left: ${Math.floor(timeLeft / 60)}m ${timeLeft % 60}s | Expired: ${timeLeft <= 0}`);
+        if (timeLeft <= 0) {
+            this.refreshToken(this.state.spotifyRefreshToken);
         } else {
-            this.findCurrentSong(this.state.spotify_access_token, this.state.genius_access_token);
+            this.findCurrentSong(this.state.spotifyAccessToken, this.state.geniusAccessToken);
         }
+    }
+
+    refreshToken(refresh_token) {
+        spotifyService.refreshTokens(refresh_token)
+            .then(data => {
+                if (data.success) {
+                    const spotifyAccessToken = data.accessToken;
+                    const spotifyExpiresIn = data.expiresIn;
+                    this.setState(prevState => ({...prevState, spotifyAccessToken, spotifyExpiresIn}));
+                    this.props.history.push(`/player?spotifyAccessToken=${spotifyAccessToken}&spotifyRefreshToken=${this.state.spotifyRefreshToken}&spotifyExpiresIn=${spotifyExpiresIn}&geniusAccessToken=${this.state.geniusAccessToken}&startTimeMs=${Date.now()}`)
+                    this.findCurrentSong(spotifyAccessToken, this.state.geniusAccessToken);
+                } else {
+                    this.setState({status: "error", message: `The player failed to load: ${data.errorMessage || "idk why"}. Please refresh the page, or redirect to the home page to restart the authorization flow.`})
+                }
+            }).catch(e => {this.setState({status: "error", message: "The player failed to load for an unknown reason. Please refresh the page, or redirect to the home page to restart the authorization flow."})})
     }
 
     render() {
@@ -190,4 +189,4 @@ class Player extends React.Component {
     }
 }
 
-export default Player;
+export default LyricPlayer;
