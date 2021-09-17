@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {BrowserRouter as Router, Switch, Route, Link} from 'react-router-dom';
+import {HashRouter, Switch, Route, Link} from 'react-router-dom';
 import './index.css';
 import Home from "./components/Home";
 import LyricPlayer from "./components/LyricPlayer";
@@ -10,17 +10,17 @@ import GeniusCallback from "./components/GeniusCallback";
 
 ReactDOM.render(
   <React.StrictMode>
-    <Router>
+    <HashRouter basename="/">
         <Link to='/'><p className="text-green-400 m-3">Home</p></Link>
         <Switch>
-            <Route path="/spotify-lyrics/spotifycallback" component={SpotifyCallback} />
-            <Route path="/spotify-lyrics/geniuscallback" component={GeniusCallback} />
-            <Route path="/spotify-lyrics/player" component={LyricPlayer} />
-            <Route path="/spotify-lyrics/visualizer" component={VisualizerContainer} />
+            <Route path={["/spotify-lyrics/spotifycallback", "/spotifycallback"]} component={SpotifyCallback} />
+            <Route path={["/spotify-lyrics/geniuscallback", "/geniuscallback"]} component={GeniusCallback} />
+            <Route path={["/spotify-lyrics/player", "/player"]} component={LyricPlayer} />
+            <Route path={["/spotify-lyrics/visualizer", "/visualizer"]} component={VisualizerContainer} />
             <Route exact path="/spotify-lyrics/" component={Home} />
             <Route exact path="/" component={Home} />
         </Switch>
-    </Router>
+    </HashRouter>
   </React.StrictMode>,
   document.getElementById('root')
 );

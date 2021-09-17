@@ -3,10 +3,10 @@ import geniusAPI from 'genius-lyrics-api';
 
 export const genius_client_id = "LnIGLJSrLWudU9q90TxMiVVWsnP3EgDSgJ8Z_JoY22o-fjzZlcoqgMFIjth8dJQt";
 export const genius_client_secret = "099cE-WQImmJg0gXRM8nimwKFRBiTV7oewrsTVtHGazzBI5U3rtVDjGY6qwF6-Qce1RzKsdBPmLXBGVWYITheQ";
-export const genius_redirect_uri = "http://maxpinheiro.github.io/lyric-player/geniuscallback";
+export const genius_redirect_uri = "http://maxpinheiro.github.io/lyric-player/#/geniuscallback";
 export const local_genius_client_id = "A7QZos8xJu0fHAJ6cNjMRDa1ZGtetaFbe2XDSh05bICRlbnwtmnhNjI3lyUI11n1";
 export const local_genius_client_secret = "QCZsmA5wcXEuIsDp8H-X1afqwqs2xVr9koLHnOiP-s5QvrHtwZbbdq0O2e7_kVQuJ9ekbYm3e288U4a2wDSNWw";
-export const local_genius_redirect_uri = "http://localhost:3000/geniuscallback";
+export const local_genius_redirect_uri = "http://localhost:3000/#/geniuscallback";
 const cors_proxy = "https://salty-wildwood-08581.herokuapp.com";
 
 export async function getAccessToken(auth_code, local = true) {
