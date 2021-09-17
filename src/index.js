@@ -8,17 +8,18 @@ import VisualizerContainer from "./components/VisualizerContainer";
 import SpotifyCallback from "./components/SpotifyCallback";
 import GeniusCallback from "./components/GeniusCallback";
 
+console.log(`public url: ${process.env.PUBLIC_URL}`);
 ReactDOM.render(
   <React.StrictMode>
-    <Router basename="/spotify-lyrics">
-        <Link to='/'><p className="text-green-400 m-3">Home</p></Link>
+    <Router basename="">
+        <Link to='/spotify-lyrics'><p className="text-green-400 m-3">Home</p></Link>
         <Switch>
-            <Route path={["/spotify-lyrics/spotifycallback", "/spotifycallback"]} component={SpotifyCallback} />
-            <Route path={["/spotify-lyrics/geniuscallback", "/geniuscallback"]} component={GeniusCallback} />
-            <Route path={["/spotify-lyrics/player", "/player"]} component={LyricPlayer} />
-            <Route path={["/spotify-lyrics/visualizer", "/visualizer"]} component={VisualizerContainer} />
-            <Route exact path="/spotify-lyrics/" component={Home} />
-            <Route exact path="/" component={Home} />
+            <Route path={[process.env.PUBLIC_URL + "/spotify-lyrics/spotifycallback", process.env.PUBLIC_URL + "/spotifycallback"]} component={SpotifyCallback} />
+            <Route path={[process.env.PUBLIC_URL + "/spotify-lyrics/geniuscallback", process.env.PUBLIC_URL + "/geniuscallback"]} component={GeniusCallback} />
+            <Route path={[process.env.PUBLIC_URL + "/spotify-lyrics/player", process.env.PUBLIC_URL + "/player"]} component={LyricPlayer} />
+            <Route path={[process.env.PUBLIC_URL + "/spotify-lyrics/visualizer", process.env.PUBLIC_URL + "/visualizer"]} component={VisualizerContainer} />
+            <Route exact path={process.env.PUBLIC_URL + "/spotify-lyrics/"} component={Home} />
+            <Route exact path={process.env.PUBLIC_URL + "/"} component={Home} />
         </Switch>
     </Router>
   </React.StrictMode>,

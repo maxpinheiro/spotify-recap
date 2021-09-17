@@ -50,10 +50,10 @@ class GeniusCallback extends React.Component {
                 {
                     this.state.status === "success" &&
                     <div className="flex flex-col">
-                        <Link to={`/player?spotifyAccessToken=${this.state.spotifyAccessToken}&spotifyRefreshToken=${this.state.spotifyRefreshToken}&spotifyExpiresIn=${this.state.spotifyExpiresIn}&geniusAccessToken=${this.state.geniusAccessToken}&startTimeMs=${Date.now()}`}
+                        <Link to={`/spotify-lyrics/player?spotifyAccessToken=${this.state.spotifyAccessToken}&spotifyRefreshToken=${this.state.spotifyRefreshToken}&spotifyExpiresIn=${this.state.spotifyExpiresIn}&geniusAccessToken=${this.state.geniusAccessToken}&startTimeMs=${Date.now()}`}
                               className="rounded bg-green-200 border-green-800 text-green-800 p-3 mb-3">Continue to Player</Link>
                         {
-                            this.state.local && <Link to={`/visualizer?spotifyAccessToken=${this.state.spotifyAccessToken}&spotifyRefreshToken=${this.state.spotifyRefreshToken}&spotifyExpiresIn=${this.state.spotifyExpiresIn}&startTimeMs=${Date.now()}`}
+                            this.state.local && <Link to={`/spotify-lyrics/visualizer?spotifyAccessToken=${this.state.spotifyAccessToken}&spotifyRefreshToken=${this.state.spotifyRefreshToken}&spotifyExpiresIn=${this.state.spotifyExpiresIn}&startTimeMs=${Date.now()}`}
                                                       className="rounded bg-green-800 border-green-200 text-green-200 p-3 mb-3">(In Production) Visualizer</Link>
                         }
                     </div>
@@ -63,7 +63,7 @@ class GeniusCallback extends React.Component {
                     <span>
                         <p className="mb-3">There was an issue logging in{this.state.message && `: ${this.state.message}`}. Please login again through the home page.</p>
                         <div className="flex">
-                            <Link to="/" className="rounded bg-green-400 p-3 mx-auto">Home page</Link>
+                            <Link to="/spotify-lyrics/" className="rounded bg-green-400 p-3 mx-auto">Home page</Link>
                         </div>
                     </span>
                 }
