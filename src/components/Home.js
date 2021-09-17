@@ -2,7 +2,7 @@ import React from 'react';
 import {generateRandomString, spotify_client_id, spotify_redirect_uri} from '../services/SpotifyService';
 import Loader from "react-loader-spinner";
 
-const scope = 'streaming user-read-private user-read-currently-playing user-read-email';
+const scope = 'streaming user-read-private user-read-currently-playing user-read-email user-modify-playback-state';
 const developing = true;
 const state = generateRandomString(10);
 

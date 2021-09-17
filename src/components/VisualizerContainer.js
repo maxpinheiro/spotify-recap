@@ -11,12 +11,13 @@ const initialState = {
     spotifyRefreshToken: undefined,
     spotifyExpiresIn: undefined,
     startTimeMs: undefined,
-    songs: [{name: undefined, artist: undefined, spotifyId: undefined, imageUrl: undefined}],
+    songs: [{name: undefined, artist: undefined, spotifyId: undefined, spotifyUri: undefined, imageUrl: undefined}],
+    beats: [{start: undefined, duration: undefined}],
     song: {
         title: undefined,
         artist: undefined,
-        albumArtUrl: undefined,
-        lyrics: undefined
+        imageUrl: undefined,
+        spotifyUri: undefined
     },
     audioFeatures: {
         danceability: undefined,
@@ -44,6 +45,9 @@ class VisualizerContainer extends React.Component {
 
         this.searchSong = this.searchSong.bind(this);
         this.selectSong = this.selectSong.bind(this);
+        this.getAudioAnalysis = this.getAudioAnalysis.bind(this);
+        this.getAudioFeatures = this.getAudioFeatures.bind(this);
+        this.startVisualizer = this.startVisualizer.bind(this);
     }
 
     componentDidMount() {
@@ -63,12 +67,51 @@ class VisualizerContainer extends React.Component {
             .then(data => {
                 if (data.success) {
                     this.setState(prevState => ({...prevState, status: "results", songs: data.songs}));
+                } else {
+                    this.setState({status: "error", message: "The player failed to load for an unknown reason. Please refresh the page, or redirect to the home page to restart the authorization flow."})
                 }
             })
     }
 
-    selectSong(spotifyId) {
-        console.log(spotifyId);
+    selectSong(spotifyId, spotifyUri, title, artist, imageUrl) {
+        this.setState(prevState => ({...prevState, status: "loading", song: {title, artist, imageUrl, spotifyUri}}));
+        spotifyService.pausePlayback(this.state.spotifyAccessToken)
+            .then(response => {
+                if (response.success) {
+                    this.getAudioAnalysis(spotifyId, this.state.spotifyAccessToken);
+                } else if (response.message) {
+                    this.setState({status: "error", message: `The player failed to load: ${response.message}. Please refresh the page, or redirect to the home page to restart the authorization flow.`})
+                } else {
+                    this.setState({status: "error", message: "The player failed to load for an unknown reason. Please refresh the page, or redirect to the home page to restart the authorization flow."})
+                }
+            })
+    }
+
+    startVisualizer() {
+
+    }
+
+    getAudioAnalysis(spotifyId, spotifyAccessToken) {
+        spotifyService.getAudioAnalysis(spotifyId, spotifyAccessToken)
+            .then(data => {
+                if (data.success) {
+                    this.setState(prevState => ({...prevState, beats: data.beats }));
+                    this.getAudioFeatures(spotifyId, spotifyAccessToken);
+                } else {
+                    this.setState({status: "error", message: "The player failed to load for an unknown reason. Please refresh the page, or redirect to the home page to restart the authorization flow."})
+                }
+            }).catch(e => {this.setState({status: "error", message: "The player failed to load for an unknown reason. Please refresh the page, or redirect to the home page to restart the authorization flow."})})
+    }
+
+    getAudioFeatures(spotifyId, spotifyAccessToken) {
+        spotifyService.getAudioFeatures(spotifyId, spotifyAccessToken)
+            .then(data => {
+                if (data.success) {
+                    this.setState(prevState => ({...prevState, status: "loaded", audioFeatures: data.audioFeatures }));
+                } else {
+                    this.setState({status: "error", message: "The player failed to load for an unknown reason. Please refresh the page, or redirect to the home page to restart the authorization flow."})
+                }
+            }).catch(e => {this.setState({status: "error", message: "The player failed to load for an unknown reason. Please refresh the page, or redirect to the home page to restart the authorization flow."})})
     }
 
     render() {
@@ -91,6 +134,30 @@ class VisualizerContainer extends React.Component {
                         <Searcher searchSong={this.searchSong}/>
                         <p>Results: </p>
                         <SearchResults songs={this.state.songs} selectSong={this.selectSong} />
+                    </div>
+                }
+                {
+                    this.state.status === "loading" &&
+                    <div>
+                        <div style={{height: "30vh"}}/>
+                        {LoadingMessage("Loading song...")}
+                        <p>If you have a track playing on Spotify, the visualizer will pause it.</p>
+                    </div>
+                }
+                {
+                    this.state.status === "loaded" &&
+                    <div>
+                        <button onClick={this.startVisualizer}
+                                className="rounded bg-green-800 border-green-200 text-green-200 p-3">
+                            Start Visualizer
+                        </button>
+                    </div>
+                }
+                {
+                    this.state.status === "error" &&
+                    <div>
+                        <div style={{height: "30vh"}} />
+                        <p>{this.state.message}</p>
                     </div>
                 }
             </div>

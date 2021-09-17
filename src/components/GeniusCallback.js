@@ -15,7 +15,8 @@ class GeniusCallback extends React.Component {
             spotifyAccessToken: undefined,
             spotifyRefreshToken: undefined,
             spotifyExpiresIn: undefined,
-            geniusAccessToken: undefined
+            geniusAccessToken: undefined,
+            local: undefined,
         };
     }
 
@@ -26,10 +27,11 @@ class GeniusCallback extends React.Component {
         if (access_token && state) setTimeout(() => this.getTokens(state, access_token), 1000);
     }
 
-    async getTokens(spotifyCode, geniusToken) {
+    getTokens(spotifyCode, geniusToken) {
+        const local = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.hostname === "";
         spotifyService.getTokens(spotifyCode).then(data => {
             if (data.success) {
-                this.setState({status: "success", spotifyAccessToken: data.accessToken, spotifyRefreshToken: data.refreshToken, spotifyExpiresIn: data.expiresIn, geniusAccessToken: geniusToken});
+                this.setState({status: "success", spotifyAccessToken: data.accessToken, spotifyRefreshToken: data.refreshToken, spotifyExpiresIn: data.expiresIn, geniusAccessToken: geniusToken, local});
             } else {
                 this.setState({status: "error", message: data.errorMessage});
             }
@@ -50,8 +52,10 @@ class GeniusCallback extends React.Component {
                     <div className="flex flex-col">
                         <Link to={`/player?spotifyAccessToken=${this.state.spotifyAccessToken}&spotifyRefreshToken=${this.state.spotifyRefreshToken}&spotifyExpiresIn=${this.state.spotifyExpiresIn}&geniusAccessToken=${this.state.geniusAccessToken}&startTimeMs=${Date.now()}`}
                               className="rounded bg-green-200 border-green-800 text-green-800 p-3 mb-3">Continue to Player</Link>
-                        <Link to={`/visualizer?spotifyAccessToken=${this.state.spotifyAccessToken}&spotifyRefreshToken=${this.state.spotifyRefreshToken}&spotifyExpiresIn=${this.state.spotifyExpiresIn}&startTimeMs=${Date.now()}`}
-                              className="rounded bg-green-800 border-green-200 text-green-200 p-3 mb-3">(In Production) Visualizer</Link>
+                        {
+                            this.state.local && <Link to={`/visualizer?spotifyAccessToken=${this.state.spotifyAccessToken}&spotifyRefreshToken=${this.state.spotifyRefreshToken}&spotifyExpiresIn=${this.state.spotifyExpiresIn}&startTimeMs=${Date.now()}`}
+                                                      className="rounded bg-green-800 border-green-200 text-green-200 p-3 mb-3">(In Production) Visualizer</Link>
+                        }
                     </div>
                 }
                 {

@@ -69,7 +69,11 @@ class LyricPlayer extends React.Component {
         spotifyService.getCurrentTrack(spotifyAccessToken)
             .then(data => {
                 if (data.success) {
-                    this.findLyrics(data.song, data.artist, data.spotifyId, data.albumArtUrl, geniusAccessToken, spotifyAccessToken);
+                    if (this.state.song.title === data.song && this.state.song.albumArtUrl === data.albumArtUrl) {
+                        this.setState(prevState => ({...prevState, status: "success"}));
+                    } else {
+                        this.findLyrics(data.song, data.artist, data.spotifyId, data.albumArtUrl, geniusAccessToken, spotifyAccessToken);
+                    }
                 } else {
                     if (data.playing === false) {
                         this.setState({status: "error", message: "No track is currently playing. Please play a track and refresh the page for the lyric player to work."});
@@ -135,6 +139,12 @@ class LyricPlayer extends React.Component {
     }
 
     refreshPlayer() {
+        // reset background style
+        if (document.body.style.backdropFilter === 'blur(5px)') {
+            document.body.style.backgroundImage = '';
+            document.body.style.backdropFilter = '';
+            document.body.classList.add('bg-white');
+        }
         this.setState(prevState => ({...prevState, status: "loading"}));
         const timeSinceStart = (Date.now() - this.state.startTimeMs) / 1000;
         const timeLeft = Math.ceil(this.state.spotifyExpiresIn - timeSinceStart);
