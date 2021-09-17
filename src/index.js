@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {HashRouter, Switch, Route, Link} from 'react-router-dom';
+import {BrowserRouter as Router, Switch, Route, Link} from 'react-router-dom';
 import './index.css';
 import Home from "./components/Home";
 import LyricPlayer from "./components/LyricPlayer";
@@ -10,7 +10,7 @@ import GeniusCallback from "./components/GeniusCallback";
 
 ReactDOM.render(
   <React.StrictMode>
-    <HashRouter basename="/">
+    <Router basename="/spotify-lyrics">
         <Link to='/'><p className="text-green-400 m-3">Home</p></Link>
         <Switch>
             <Route path={["/spotify-lyrics/spotifycallback", "/spotifycallback"]} component={SpotifyCallback} />
@@ -20,7 +20,7 @@ ReactDOM.render(
             <Route exact path="/spotify-lyrics/" component={Home} />
             <Route exact path="/" component={Home} />
         </Switch>
-    </HashRouter>
+    </Router>
   </React.StrictMode>,
   document.getElementById('root')
 );

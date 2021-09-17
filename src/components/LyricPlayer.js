@@ -191,6 +191,10 @@ class LyricPlayer extends React.Component {
                     <div>
                         <div style={{height: "30vh"}} />
                         <p>{this.state.message}</p>
+                        {
+                            this.state.message.includes("No track is currently playing") &&
+                            <button onClick={this.refreshPlayer} className="rounded bg-green-200 border-green-800 text-green-800 p-3 mb-3">Refresh Player</button>
+                        }
                     </div>
                 }
 

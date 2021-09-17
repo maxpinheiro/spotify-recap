@@ -1,8 +1,8 @@
 // spotify dashboard: maxpinheiro181, Poi1poi1$$
 export const spotify_client_id = "171ae7dd63c640819e0446c3b2dfd196";
 export const spotify_client_secret = "b0abf14d0a084609b0ab79251dab34d4";
-export const spotify_redirect_uri = "http://maxpinheiro.github.io/spotify-lyrics/#/spotifycallback";
-export const local_spotify_redirect_uri = "http://localhost:3000/#/spotifycallback";
+export const spotify_redirect_uri = "http://maxpinheiro.github.io/spotify-lyrics/spotifycallback";
+export const local_spotify_redirect_uri = "http://localhost:3000/spotify-lyrics/spotifycallback";
 
 export const generateRandomString = (length) => {
     let text = '';
