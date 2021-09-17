@@ -13,10 +13,11 @@ ReactDOM.render(
     <Router>
         <Link to='/'><p className="text-green-400 m-3">Home</p></Link>
         <Switch>
-            <Route path="/spotifycallback" component={SpotifyCallback} />
-            <Route path="/geniuscallback" component={GeniusCallback} />
-            <Route path="/player" component={LyricPlayer} />
-            <Route path="/visualizer" component={VisualizerContainer} />
+            <Route path="/spotify-lyrics/spotifycallback" component={SpotifyCallback} />
+            <Route path="/spotify-lyrics/geniuscallback" component={GeniusCallback} />
+            <Route path="/spotify-lyrics/player" component={LyricPlayer} />
+            <Route path="/spotify-lyrics/visualizer" component={VisualizerContainer} />
+            <Route exact path="/spotify-lyrics/" component={Home} />
             <Route exact path="/" component={Home} />
         </Switch>
     </Router>

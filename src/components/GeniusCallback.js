@@ -29,7 +29,7 @@ class GeniusCallback extends React.Component {
 
     getTokens(spotifyCode, geniusToken) {
         const local = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.hostname === "";
-        spotifyService.getTokens(spotifyCode).then(data => {
+        spotifyService.getTokens(spotifyCode, local).then(data => {
             if (data.success) {
                 this.setState({status: "success", spotifyAccessToken: data.accessToken, spotifyRefreshToken: data.refreshToken, spotifyExpiresIn: data.expiresIn, geniusAccessToken: geniusToken, local});
             } else {
