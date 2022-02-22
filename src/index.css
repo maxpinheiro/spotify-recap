@@ -11,3 +11,19 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* custom colors */
+
+.bg-spotify-green {
+  background-color: #2f9c51;
+}
+
+.text-spotify-green {
+  color: #2f9c51;
+}
+
+/* typography */
+
+.text-josephin {
+  font-family: 'Josefin Sans', sans-serif;
+}

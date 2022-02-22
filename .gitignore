@@ -114,8 +114,11 @@ dist
 
 # production
 /build
+.idea/*
 .idea
 .idea/workspace.xml
+.idea/modules.xml
+
 
 # misc
 .DS_Store
@@ -127,3 +130,4 @@ dist
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+yarn.lock

@@ -1,8 +1,8 @@
 // spotify dashboard: maxpinheiro181, Poi1poi1$$
-export const spotify_client_id = "171ae7dd63c640819e0446c3b2dfd196";
-export const spotify_client_secret = "b0abf14d0a084609b0ab79251dab34d4";
-export const spotify_redirect_uri = "http://maxpinheiro.github.io/spotify-lyrics/spotifycallback";
-export const local_spotify_redirect_uri = "http://localhost:3000/spotify-lyrics/spotifycallback";
+export const spotify_client_id = "ae520a706c27417f8b6b44bc41c224d0";
+export const spotify_client_secret = "2fecacd1974f4b9aacc3bafb76e8aeda";
+export const spotify_redirect_uri = "http://maxpinheiro.github.io/spotify-recap/%23/spotifycallback";
+export const local_spotify_redirect_uri = "http://localhost:3000/spotifycallback";
 
 export const generateRandomString = (length) => {
     let text = '';
@@ -36,7 +36,7 @@ export async function getTokens(auth_code, local = true) {
     const body = {
         grant_type: "authorization_code",
         code: auth_code,
-        redirect_uri: local ? local_spotify_redirect_uri : spotify_redirect_uri
+        redirect_uri: local ? local_spotify_redirect_uri : "http://maxpinheiro.github.io/spotify-lyrics/#/spotifycallback"
     };
     const encoded = jsonToUrlEncoded(body);
 
@@ -96,6 +96,23 @@ export async function refreshTokens(refresh_token) {
             }
         })
     })).catch(e => e.json())
+}
+
+export async function getTopItems(access_token, type="artists", timespan="medium_term") {
+    return fetch(`https://api.spotify.com/v1/me/top/${type}?time_range=${timespan}`, {
+        headers: {
+            "Content-Type": 'application/json',
+            Authorization: `Bearer ${access_token}`
+        }
+    }).then(res => res.json().then(data => {
+        return new Promise(resolve => {
+            if (data.hasOwnProperty("items")) {
+                resolve({success: true, items: data.items});
+            } else {
+                resolve({success: false});
+            }
+        })
+    }))
 }
 
 export async function getCurrentTrack(access_token) {
@@ -276,5 +293,5 @@ export async function addToQueue(spotifyUri, access_token) {
     })
 }
 
-const spotifyService = {getTokens, refreshTokens, getCurrentTrack, getAudioFeatures, getAudioAnalysis, searchSongs, pausePlayback, skipPlayback, addToQueue};
+const spotifyService = {getTokens, refreshTokens, getTopItems, getCurrentTrack, getAudioFeatures, getAudioAnalysis, searchSongs, pausePlayback, skipPlayback, addToQueue};
 export default spotifyService;
