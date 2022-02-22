@@ -1,14 +1,14 @@
 {
   "files": {
     "main.css": "/spotify-recap/static/css/main.546f3d28.chunk.css",
-    "main.js": "/spotify-recap/static/js/main.0dad6e35.chunk.js",
-    "main.js.map": "/spotify-recap/static/js/main.0dad6e35.chunk.js.map",
+    "main.js": "/spotify-recap/static/js/main.e836cece.chunk.js",
+    "main.js.map": "/spotify-recap/static/js/main.e836cece.chunk.js.map",
     "runtime-main.js": "/spotify-recap/static/js/runtime-main.8b14ccd5.js",
     "runtime-main.js.map": "/spotify-recap/static/js/runtime-main.8b14ccd5.js.map",
     "static/js/2.894a6f19.chunk.js": "/spotify-recap/static/js/2.894a6f19.chunk.js",
     "static/js/2.894a6f19.chunk.js.map": "/spotify-recap/static/js/2.894a6f19.chunk.js.map",
     "index.html": "/spotify-recap/index.html",
-    "precache-manifest.c584c35db5f945ffe8ea9fc9a7c257ee.js": "/spotify-recap/precache-manifest.c584c35db5f945ffe8ea9fc9a7c257ee.js",
+    "precache-manifest.a37aff5d1f5a21228ab454d61d3792f1.js": "/spotify-recap/precache-manifest.a37aff5d1f5a21228ab454d61d3792f1.js",
     "service-worker.js": "/spotify-recap/service-worker.js",
     "static/css/main.546f3d28.chunk.css.map": "/spotify-recap/static/css/main.546f3d28.chunk.css.map",
     "static/js/2.894a6f19.chunk.js.LICENSE.txt": "/spotify-recap/static/js/2.894a6f19.chunk.js.LICENSE.txt"
@@ -17,6 +17,6 @@
     "static/js/runtime-main.8b14ccd5.js",
     "static/js/2.894a6f19.chunk.js",
     "static/css/main.546f3d28.chunk.css",
-    "static/js/main.0dad6e35.chunk.js"
+    "static/js/main.e836cece.chunk.js"
   ]
 }
