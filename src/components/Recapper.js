@@ -11,7 +11,6 @@ const initialState = {
     refreshToken: undefined,
     expiresIn: undefined,
     startTimeMs: undefined,
-    
 };
 
 class RecapContainer extends React.Component {
@@ -33,8 +32,7 @@ class RecapContainer extends React.Component {
             if (((Date.now() - startTimeMs) / 1000) >= expiresIn) {
                 this.refreshPlayer(refreshToken);
             } else {
-                console.log(accessToken)
-                this.getTopItems(accessToken);
+                this.getAllTopItems(accessToken);
             }
         } else {
             this.setState({status: "error", message: "The player failed to load for an unknown reason. Please refresh the page, or redirect to the home page to restart the authorization flow."})
@@ -75,9 +73,60 @@ class RecapContainer extends React.Component {
                     this.props.history.push(`/player?spotifyAccessToken=${spotifyAccessToken}&spotifyRefreshToken=${this.state.spotifyRefreshToken}&spotifyExpiresIn=${spotifyExpiresIn}&startTimeMs=${Date.now()}`)
                     this.findCurrentSong(spotifyAccessToken);
                 } else {
-                    this.setState({status: "error", message: `The recapper failed to load: ${data.errorMessage || "idk why"}. Please refresh the page, or redirect to the home page to restart the authorization flow.`})
+                    this.setState({status: "error", message: data.errorMessage || "idk why"});
                 }
             }).catch(e => {this.setState({status: "error", message: "The player failed to load for an unknown reason. Please refresh the page, or redirect to the home page to restart the authorization flow."})})
+    }
+
+    async getAllTopItems(accessToken) {
+        let allData = {
+            artists: {
+                short_term: [],
+                medium_term: [],
+                long_term: []
+            }, 
+            tracks: {
+                short_term: [],
+                medium_term: [],
+                long_term: []
+            }
+        }
+        let success = true;
+
+        (["short_term", "medium_term", "long_term"]).forEach(async (timespan) => {
+            const topArtists = await spotifyService.getTopItems(accessToken, "artists", timespan);
+            const topTracks = await spotifyService.getTopItems(accessToken, "tracks", timespan);
+
+            if (topArtists.success && topTracks.success) {
+                allData["artists"][timespan] = topArtists.items;
+                allData["tracks"][timespan] = topTracks.items;
+            } else {
+                success = false;
+            }
+
+        });
+
+        if (success) {
+            this.setState(prevState => ({...prevState, status: "success", allData}));
+        } else {
+            this.setState({status: "error"});
+        }
+    }
+
+    getTopGenres(topArtists = []) {
+        let genreDict = {};
+        topArtists.forEach(artist => {
+            const genres = artist.genres || [];
+            genres.forEach(genre => {
+                if (genre in genreDict) {
+                    genreDict[genre] += 1;
+                } else {
+                    genreDict[genre] = 1;
+                }
+            })
+        });
+        //console.log(genreDict);
+        return genreDict;
     }
 
     getTopItems(accessToken, type="artists", timespan="medium_term") {
@@ -89,7 +138,6 @@ class RecapContainer extends React.Component {
                     this.setState({status: "error", message: `The recapper failed to load: ${data.errorMessage || "idk why"}. Please refresh the page, or redirect to the home page to restart the authorization flow.`})
                 }
             })
-        
     }
 
     render() {
@@ -99,7 +147,7 @@ class RecapContainer extends React.Component {
                     this.state.status === "loading" && <div><div style={{height: "30vh"}} />{LoadingMessage("Collecting your listening history...", "#15d61c", "text-white")}</div>
                 }
                 {
-                    this.state.status === "success" && <RecapInfo items={this.state.items} type="artists" />
+                    this.state.status === "success" && this.state.allData && <RecapInfo topArtists={this.state.allData["artists"]} topTracks={this.state.allData["tracks"]} />
                 }
                 {
                     this.state.status === "error" &&

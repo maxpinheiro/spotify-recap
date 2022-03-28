@@ -22,6 +22,10 @@ code {
   color: #2f9c51;
 }
 
+.text-white-disabled {
+  color: rgba(255, 255, 255, 0.5);
+}
+
 /* typography */
 
 .text-josephin {

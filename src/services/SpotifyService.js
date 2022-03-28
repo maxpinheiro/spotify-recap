@@ -1,8 +1,13 @@
 // spotify dashboard: maxpinheiro181, Poi1poi1$$
 export const spotify_client_id = "ae520a706c27417f8b6b44bc41c224d0";
 export const spotify_client_secret = "2fecacd1974f4b9aacc3bafb76e8aeda";
-export const spotify_redirect_uri = "http://maxpinheiro.github.io/spotify-recap/%23/spotifycallback";
-export const local_spotify_redirect_uri = "http://localhost:3000/spotifycallback";
+export const spotify_redirect_uri = "http://maxpinheiro.github.io/spotify-recap%2F%23%2Fspotifycallback";
+const spotify_redirect_uri_unencoded = "http://maxpinheiro.github.io/spotify-recap/#/spotifycallback";
+//export const local_spotify_redirect_uri = "http://localhost:3000/spotifycallback";
+export const local_spotify_redirect_uri = "http://localhost:3000%2F%23%2Fcallback";
+const local_spotify_redirect_uri_unencoded = "http://localhost:3000/#/callback";
+//export const local_spotify_redirect_uri = "http://localhost:3000%23%2Fcallback";
+const spotify_api_root = "https://api.spotify.com/v1";
 
 export const generateRandomString = (length) => {
     let text = '';
@@ -36,7 +41,7 @@ export async function getTokens(auth_code, local = true) {
     const body = {
         grant_type: "authorization_code",
         code: auth_code,
-        redirect_uri: local ? local_spotify_redirect_uri : "http://maxpinheiro.github.io/spotify-lyrics/#/spotifycallback"
+        redirect_uri: local ? local_spotify_redirect_uri_unencoded : spotify_redirect_uri_unencoded
     };
     const encoded = jsonToUrlEncoded(body);
 
@@ -98,8 +103,26 @@ export async function refreshTokens(refresh_token) {
     })).catch(e => e.json())
 }
 
+// type: artists | tracks
 export async function getTopItems(access_token, type="artists", timespan="medium_term") {
-    return fetch(`https://api.spotify.com/v1/me/top/${type}?time_range=${timespan}`, {
+    return fetch(`${spotify_api_root}/me/top/${type}?time_range=${timespan}`, {
+        headers: {
+            "Content-Type": 'application/json',
+            Authorization: `Bearer ${access_token}`
+        }
+    }).then(res => res.json().then(data => {
+        return new Promise(resolve => {
+            if (data.hasOwnProperty("items")) {
+                resolve({success: true, items: data.items});
+            } else {
+                resolve({success: false});
+            }
+        })
+    }))
+}
+
+export async function getRecommendations(access_token, items, type="artists") {
+    return fetch(`${spotify_api_root}/recommendations?seed_${type}=${items}`, {
         headers: {
             "Content-Type": 'application/json',
             Authorization: `Bearer ${access_token}`
@@ -116,7 +139,7 @@ export async function getTopItems(access_token, type="artists", timespan="medium
 }
 
 export async function getCurrentTrack(access_token) {
-    return fetch('https://api.spotify.com/v1/me/player/currently-playing', {
+    return fetch(`${spotify_api_root}/me/player/currently-playing`, {
         headers: {
             "Content-Type": 'application/json',
             Authorization: `Bearer ${access_token}`
@@ -143,7 +166,7 @@ export async function getCurrentTrack(access_token) {
 }
 
 export async function getAudioFeatures(spotifyId, access_token) {
-    return fetch(`https://api.spotify.com/v1/audio-features/${spotifyId}`, {
+    return fetch(`${spotify_api_root}/audio-features/${spotifyId}`, {
         headers: {
             "Content-Type": 'application/json',
             Authorization: `Bearer ${access_token}`
@@ -175,7 +198,7 @@ export async function getAudioFeatures(spotifyId, access_token) {
 }
 
 export async function getAudioAnalysis(spotifyId, access_token) {
-    return fetch(`https://api.spotify.com/v1/audio-features/${spotifyId}`, {
+    return fetch(`${spotify_api_root}/audio-features/${spotifyId}`, {
         headers: {
             "Content-Type": 'application/json',
             Authorization: `Bearer ${access_token}`
@@ -192,7 +215,7 @@ export async function getAudioAnalysis(spotifyId, access_token) {
 }
 
 export async function searchSongs(query, access_token) {
-    return fetch(`https://api.spotify.com/v1/search?q=${query}&type=track&limit=10`, {
+    return fetch(`${spotify_api_root}/search?q=${query}&type=track&limit=10`, {
         headers: {
             "Content-Type": 'application/json',
             Authorization: `Bearer ${access_token}`
@@ -213,85 +236,7 @@ export async function searchSongs(query, access_token) {
     }))
 }
 
-export async function startPlayback(access_token) {
-    return fetch('https://api.spotify.com/v1/me/player/play', {
-        method: 'PUT',
-        headers: {
-            "Content-Type": 'application/json',
-            Authorization: `Bearer ${access_token}`
-        }
-    }).then(res => {
-        if (res.status === 204) {
-            return new Promise(resolve => resolve({success: true}));
-        } else if (res.status === 404) {
-            return new Promise(resolve => resolve({success: false, message: "no device found"}));
-        } else if (res.status === 403) {
-            return new Promise(resolve => resolve({success: false, message: "user making request is non-premium"}));
-        } else {
-            return new Promise(resolve => resolve({success: false, message: "unknown error"}));
-        }
-    })
-}
 
-export async function pausePlayback(access_token) {
-    return fetch('https://api.spotify.com/v1/me/player/pause', {
-        method: 'PUT',
-        headers: {
-            "Content-Type": 'application/json',
-            Authorization: `Bearer ${access_token}`
-        }
-    }).then(res => {
-        if (res.status === 204) {
-            return new Promise(resolve => resolve({success: true}));
-        } else if (res.status === 404) {
-            return new Promise(resolve => resolve({success: false, message: "no device found"}));
-        } else if (res.status === 403) {
-            return new Promise(resolve => resolve({success: false, message: "user making request is non-premium"}));
-        } else {
-            return new Promise(resolve => resolve({success: false, message: "unknown error"}));
-        }
-    })
-}
 
-export async function skipPlayback(access_token) {
-    return fetch('https://api.spotify.com/v1/me/player/next', {
-        method: 'POST',
-        headers: {
-            "Content-Type": 'application/json',
-            Authorization: `Bearer ${access_token}`
-        }
-    }).then(res => {
-        if (res.status === 204) {
-            return new Promise(resolve => resolve({success: true}));
-        } else if (res.status === 404) {
-            return new Promise(resolve => resolve({success: false, message: "no device found"}));
-        } else if (res.status === 403) {
-            return new Promise(resolve => resolve({success: false, message: "user making request is non-premium"}));
-        } else {
-            return new Promise(resolve => resolve({success: false, message: "unknown error"}));
-        }
-    })
-}
-
-export async function addToQueue(spotifyUri, access_token) {
-    return fetch(`https://api.spotify.com/v1/me/player/queue?uri=${spotifyUri}`, {
-        method: 'POST',
-        headers: {
-            "Content-Type": 'application/json',
-            Authorization: `Bearer ${access_token}`
-        }
-    }).then(res => {
-        if (res.status === 204) {
-            return new Promise(resolve => resolve({success: true}));
-        } else if (res.status === 404) {
-            return new Promise(resolve => resolve({success: false, message: "no device found"}));
-        } else if (res.status === 403) {
-            return new Promise(resolve => resolve({success: false, message: "user making request is non-premium"}));
-        } else {
-            return new Promise(resolve => resolve({success: false, message: "unknown error"}));
-        }
-    })
-}
-
-const spotifyService = {getTokens, refreshTokens, getTopItems, getCurrentTrack, getAudioFeatures, getAudioAnalysis, searchSongs, pausePlayback, skipPlayback, addToQueue};
+const spotifyService = {getTokens, refreshTokens, getTopItems, getCurrentTrack, getAudioFeatures, getAudioAnalysis, searchSongs};
 export default spotifyService;

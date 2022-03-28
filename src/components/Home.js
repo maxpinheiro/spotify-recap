@@ -27,7 +27,7 @@ const Home = () => {
     const local = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.hostname === "";
     console.log(`Mode: ${local ? 'development' : 'production'}`);
     if (spotifyCallback) {
-        return <Redirect to={`/spotify-lyrics#/spotifycallback${window.location.search}`} />;
+        return <Redirect to={`/callback${window.location.search}`} />;
     } else {
         return (
             <div className="container mx-auto">
